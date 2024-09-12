@@ -47,6 +47,8 @@ class Frame:
 
         self.base_palette = None
 
+        self.target_object = None
+
     def get_meta_render_output_path(self, suffix=""):
         file_name = self.get_meta_render_output_file_name(suffix)
         if suffix != "":
@@ -81,6 +83,22 @@ class Frame:
         object = bpy.data.objects['Rig']
         if object is None:
             return
+        if not self.target_object is None:
+            for o in bpy.data.scenes[0].objects:
+                if o == self.target_object:
+                    continue
+                if o.rct_graphics_helper_object_properties.object_type == 'NONE':
+                    continue
+                o.hide_render = True
+                for c in o.children:
+                    c.hide_render = True
+
+            self.target_object.hide_render = False
+            for c in self.target_object.children:
+                c.hide_render = False
+
+            object.location = self.target_object.location
+
         object.rotation_euler = (math.radians(self.bank_angle),
                                  math.radians(self.vertical_angle), math.radians(self.mid_angle))
         vJoint = object.children[0]
@@ -129,3 +147,6 @@ class Frame:
         if len(self.output_indices) != self.width * self.length * layers:
             raise Exception(
                 "The number of output indices does not match the number of expected output sprites for this frame")
+    
+    def set_target_object(self, object):
+        self.target_object = object

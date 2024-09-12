@@ -41,14 +41,4 @@ class RenderTiles(RCTRender, bpy.types.Operator):
             self.task_builder.add_viewing_angles(
                 props.viewing_angles, animationIndex)
 
-        # Add rider peep frames
-        self.task_builder.set_recolorables(2)
-        self.task_builder.set_palette(self.palette_manager.get_rider_palette())
-        for i in range(general_props.number_of_rider_sets):
-            self.task_builder.set_layer("Riders {}".format(i + 1))
-
-            for animationIndex in range(general_props.number_of_animation_frames):
-                self.task_builder.add_viewing_angles(
-                    props.viewing_angles, animationIndex)
-
         return self.task_builder.create_task(context)

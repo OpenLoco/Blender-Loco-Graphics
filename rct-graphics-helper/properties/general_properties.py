@@ -18,12 +18,6 @@ class GeneralProperties(bpy.types.PropertyGroup):
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
 
-    number_of_rider_sets = bpy.props.IntProperty(
-        name="Sets of Riders",
-        description="Number of unqique sets of riders. Usually the amount of peeps in the vehicle/ride divided by 2 (peeps are typically paired in groups of 2).",
-        default=0,
-        min=0)
-
     number_of_animation_frames = bpy.props.IntProperty(
         name="Animation Frames",
         description="Number of animation frames. For example in use for swinging, rotating or animated ride vehicles, animated rides, and animated scenery",
@@ -35,7 +29,7 @@ class GeneralProperties(bpy.types.PropertyGroup):
         description="Number of recolorables on this object.",
         default=0,
         min=0,
-        max=3)
+        max=2)
 
     cast_shadows = bpy.props.BoolProperty(
         name="Shadows",
@@ -77,8 +71,6 @@ class GeneralProperties(bpy.types.PropertyGroup):
              "Automatically selects the most common palette for the render type.", 1),
             ("FULL", "Default Full Color",
              "Standard palette featuring all the non-animated colors.", 2),
-            ("VEHICLE", "Vehicle Gray Only",
-             "Common palette for vehicles, only uses black, gray and white for non-recolorable parts.", 3),
             ("CUSTOM", "Custom",
              "Create a custom palette by selected the colors to include.", 4)
         )

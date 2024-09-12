@@ -139,9 +139,7 @@ class Renderer:
     # Sets the global override material that the scene is rendered with
     def set_override_material(self, material):
         self.context.scene.render.layers["Editor"].material_override = material
-        for i in range(8):
-            self.context.scene.render.layers["Riders {}".format(
-                i + 1)].material_override = material
+        self.context.scene.render.layers["Braking Lights"].material_override = material
 
     def set_multi_tile_size(self, width, length):
         width_node = None
@@ -160,9 +158,8 @@ class Renderer:
 
     # Sets the active render layer
     def set_layer(self, layer_name):
-        layers = ["Editor"]
-        for i in range(8):
-            layers.append("Riders {}".format(i + 1))
+        layers = ["Editor", "Braking Lights"]
+
         for layer in layers:
             self.context.scene.render.layers[layer].use = False
         self.context.scene.render.layers[layer_name].use = True

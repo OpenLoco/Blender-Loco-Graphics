@@ -56,13 +56,44 @@ class TaskBuilder:
         self.offset_x = offset_x
         self.offset_y = offset_y
 
+    def add_frame(self, frame_index, number_of_viewing_angles, angle_index, animation_index, rotation_range, target_object):
+        angle = rotation_range / number_of_viewing_angles * angle_index
+
+        frame = Frame(frame_index, self.task, angle + self.view_angle,
+                        self.bank_angle, self.vertical_angle, self.mid_angle)
+        frame.set_multi_tile_size(self.width, self.length, self.invert_tile_positions)
+
+        frame.set_offset(self.offset_x, self.offset_y)
+
+        frame.set_recolorables(self.recolorables)
+
+        frame.set_layer(self.layer)
+
+        frame.set_base_palette(self.palette)
+
+        frame.set_anti_aliasing_with_background(
+            self.use_anti_aliasing, self.anti_alias_with_background, self.maintain_aliased_silhouette)
+
+        frame.animation_frame_index = animation_index
+
+        frame.set_target_object(target_object)
+
+        self.angles.append(frame)
+        self.output_index = self.output_index + 1
+
     # Adds render angles for the given number of viewing angles relative to the currently configured rotation
-    def add_viewing_angles(self, number_of_viewing_angles, animation_frame_index=0, animation_frames=1):
+    def add_viewing_angles(self, number_of_viewing_angles, animation_frame_index=0, animation_frames=1, rotational_symmetry=False):
 
         start_output_index = self.output_index
+
+        if rotational_symmetry:
+            number_of_viewing_angles = int(number_of_viewing_angles / 2)
+
+        rotation_range = 180 if rotational_symmetry else 360
+
         for i in range(number_of_viewing_angles):
             for j in range(animation_frames):
-                angle = 360 / number_of_viewing_angles * i
+                angle = rotation_range / number_of_viewing_angles * i
 
                 frame_index = start_output_index + i * animation_frames + j
                 frame = Frame(frame_index, self.task, angle + self.view_angle,

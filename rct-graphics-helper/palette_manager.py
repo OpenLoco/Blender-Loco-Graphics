@@ -15,64 +15,41 @@ import math
 from .models.palette import Palette, palette_base_path
 
 default_full_palette = Palette(os.path.join(
-    palette_base_path, "default_full_palette.bmp"), [
+    palette_base_path, "base_loco_palette.png"), [
     "black",
-    "gray",
-    "lavender_purple",
-    "violet_purple",
-    "blue",
-    "teal",
-    "yellow_green",
-    "sea_green",
-    "light_olive_green",
-    "dark_olive_green",
-    "lime_green",
+    "mutedOliveGreen",
+    "mutedDarkYellow",
     "yellow",
-    "bright_yellow",
+    "mutedDarkRed",
+    "mutedGrassGreen",
+    "mutedAvocadoGreen",
+    "green",
+    "mutedOrange",
+    "mutedPurple",
+    "blue",
+    "mutedSeaGreen",
+    "purple",
+    "red",
     "orange",
-    "salmon",
-    "sandy_brown",
-    "tan_brown",
-    "bordeaux_red",
-    "bright_red",
-    "magenta",
-    "transparent"
-])
-
-default_vehicle_palette = Palette(os.path.join(
-    palette_base_path, "default_vehicle_palette.bmp"), [
-    "black",
+    "mutedDarkTeal",
+    "pink",
+    "brown",
+    "amber",
     "gray",
+    "brightYellow",
+    "unusedHotPink",
     "transparent"
 ])
 
-rider_palette = Palette(os.path.join(palette_base_path, "peep_palette.bmp"), [
-    "black",
-    "salmon",
-    "transparent"
-])
-
-recolor_1_palette = Palette(os.path.join(
-    palette_base_path, "recolor_1_palette.bmp"), [
-    "recolor_1",
-    "transparent"
-])
-
-recolor_1_orct2_palette = Palette(os.path.join(
-    palette_base_path, "recolor_1_orct2_palette.bmp"), [
-    "recolor_1_orct2",
+recolor_1_loco_palette = Palette(os.path.join(
+    palette_base_path, "recolor_1_loco_palette.bmp"), [
+    "recolor_1_loco",
     "transparent"
 ])
 
 recolor_2_palette = Palette(os.path.join(
-    palette_base_path, "recolor_2_palette.bmp"), [
-    "magenta",
-    "transparent"
-])
-
-recolor_3_palette = Palette(os.path.join(
-    palette_base_path, "recolor_3_palette.bmp"), [
-    "yellow",
+    palette_base_path, "recolour_2_loco_palette.png"), [
+    "pink",
     "transparent"
 ])
 
@@ -87,15 +64,8 @@ custom_palette = Palette(os.path.join(
 class PaletteManager:
     def __init__(self):
         self.recolor_palettes = [
-            recolor_1_palette,
-            recolor_2_palette,
-            recolor_3_palette
-        ]
-
-        self.orct2_recolor_palettes = [
-            recolor_1_orct2_palette,
-            recolor_2_palette,
-            recolor_3_palette
+            recolor_1_loco_palette,
+            recolor_2_palette
         ]
 
     # Gets a base palette for the selected palette mode for the selected number of recolorables
@@ -108,8 +78,6 @@ class PaletteManager:
         if selected_palette_mode == "FULL":
             base_palette = default_full_palette.copy()
             base_palette.invalidated = True
-        elif selected_palette_mode == "VEHICLE":
-            base_palette = default_vehicle_palette.copy()
         elif selected_palette_mode == "CUSTOM":
             base_palette = custom_palette.copy()
             base_palette.invalidated = True
@@ -125,14 +93,6 @@ class PaletteManager:
     # Gets the recolor palette for the specified recolor index
     def get_recolor_palette(self, recolor_index):
         return self.recolor_palettes[recolor_index]
-
-    # Gets the recolor palette for the specified recolor index that is used by ORCT2
-    def get_orct2_recolor_palette(self, recolor_index):
-        return self.orct2_recolor_palettes[recolor_index]
-
-    # Gets the rider palette
-    def get_rider_palette(self):
-        return rider_palette
 
     # Overwrites the colors of the custom palette
     def set_custom_palette(self, colors):

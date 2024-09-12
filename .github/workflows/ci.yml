@@ -1,0 +1,26 @@
+name: CI
+on: [push, pull_request]
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  package_replays:
+    name: Package Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Package Plugin
+        run: zip loco-graphics-helper.zip ./rct-graphics-helper/* -r
+      - name: Upload artifacts (CI)
+        uses: actions/upload-artifact@v4
+        with:
+          name: loco-graphics-helper
+          path: loco-graphics-helper.zip
+          if-no-files-found: error
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: SHA1:${{ steps.package.outputs.SHA1 }}
+          files: loco-graphics-helper.zip

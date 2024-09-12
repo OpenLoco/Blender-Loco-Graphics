@@ -78,13 +78,11 @@ class GraphicsHelperPanel(bpy.types.Panel):
         row.prop(properties, "y_offset")
 
         row = layout.row()
-        row.prop(properties, "number_of_rider_sets")
-
-        row = layout.row()
         row.prop(properties, "number_of_recolorables")
 
-        row = layout.row()
-        row.prop(properties, "number_of_animation_frames")
+        if not properties.render_mode == "VEHICLE":
+            row = layout.row()
+            row.prop(properties, "number_of_animation_frames")
 
         row = layout.row()
         row.prop(properties, "cast_shadows")
@@ -215,30 +213,117 @@ class GraphicsHelperPanel(bpy.types.Panel):
         #    row.operator("render.rct_track", text=text)
 
     def draw_vehicle_panel(self, scene, layout):
-        properties = scene.rct_graphics_helper_vehicle_properties
         general_properties = scene.rct_graphics_helper_general_properties
 
-        box = layout.box()
-
-        row = box.row()
-        row.label("Ride Vehicle Track Properties:")
-
-        split = box.split(.50)
-        columns = [split.column(), split.column()]
-        i = 0
-        for sprite_track_flagset in properties.sprite_track_flags_list:
-            columns[i % 2].row().prop(properties, "sprite_track_flags",
-                                      index=i, text=sprite_track_flagset.name)
-            i += 1
-
         row = layout.row()
-        row.prop(properties, "restraint_animation")
 
-        row = layout.row()
-        row.prop(properties, "inverted_set")
-
-        row = layout.row()
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
         row.operator("render.rct_vehicle", text=text)
+
+class ObjectHelperPanel(bpy.types.Panel):
+    bl_label = "Loco Graphics"
+    bl_idname = "OBJECT_PT_tester"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = 'object'
+
+    def draw(self, context):
+        layout = self.layout
+        object_properties = context.object.rct_graphics_helper_object_properties
+
+        row = layout.row()
+        row.prop(object_properties, "object_type")
+        
+        if not "Rig" in context.scene.objects:
+            return
+
+        if object_properties.object_type == "CAR":
+            self.draw_car_panel(context, layout)
+        
+        if object_properties.object_type == "BOGIE":
+            self.draw_bogie_panel(context, layout)
+
+    def draw_bogie_panel(self, context, layout):
+        scene = context.scene
+        general_properties = scene.rct_graphics_helper_general_properties
+        row = layout.row()
+
+        if not general_properties.render_mode == "VEHICLE":
+            row.label("Vehicle Render Mode Required")
+            return
+
+        vehicle_properties = context.object.rct_graphics_helper_vehicle_properties
+
+        box = layout.box()
+
+        row = box.row()
+        row.label("Track Properties:")
+
+        split = box.split(.50)
+        columns = [split.column(), split.column()]
+        i = 0
+        for sprite_track_flagset in vehicle_properties.sprite_track_flags_list:
+            columns[i % 2].row().prop(vehicle_properties, "sprite_track_flags",
+                                      index=i, text=sprite_track_flagset.name)
+            i += 1
+
+        row = layout.row()
+
+        row.label("Flat Viewing Angles: 32")
+        row = layout.row()
+
+        row.label("Sloped Viewing Angles: 32")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "rotational_symmetry")
+        row = layout.row()
+
+    def draw_car_panel(self, context, layout):
+        scene = context.scene
+        general_properties = scene.rct_graphics_helper_general_properties
+        row = layout.row()
+
+        if not general_properties.render_mode == "VEHICLE":
+            row.label("Vehicle Render Mode Required")
+            return
+
+        vehicle_properties = context.object.rct_graphics_helper_vehicle_properties
+
+        box = layout.box()
+
+        row = box.row()
+        row.label("Track Properties:")
+
+        split = box.split(.50)
+        columns = [split.column(), split.column()]
+        i = 0
+        for sprite_track_flagset in vehicle_properties.sprite_track_flags_list:
+            columns[i % 2].row().prop(vehicle_properties, "sprite_track_flags",
+                                      index=i, text=sprite_track_flagset.name)
+            i += 1
+
+        row = layout.row()
+
+        row.label("Flat Viewing Angles:")
+        row = layout.row()
+        row.prop(vehicle_properties, "flat_viewing_angles", text="")
+        row = layout.row()
+
+        row.label("Sloped Viewing Angles:")
+        row = layout.row()
+        row.prop(vehicle_properties, "sloped_viewing_angles", text="")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "number_of_animation_frames")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "rotational_symmetry")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "braking_lights")
+        row = layout.row()

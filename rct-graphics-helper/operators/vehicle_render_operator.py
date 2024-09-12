@@ -20,7 +20,6 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
     bl_label = "Render RCT Vehicle"
 
     def create_task(self, context):
-        props = context.scene.rct_graphics_helper_vehicle_properties
         general_props = context.scene.rct_graphics_helper_general_properties
 
         self.task_builder.clear()
@@ -33,27 +32,17 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_recolorables(
             general_props.number_of_recolorables)
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
-            general_props.palette, general_props.number_of_recolorables, "VEHICLE"))
+            general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        self.add_render_angles(
-            context, False, general_props.number_of_animation_frames)
+        cars = [x for x in context.scene.objects if x.rct_graphics_helper_object_properties.object_type == "CAR"]
+        cars = sorted(cars, key=lambda x: x.rct_graphics_helper_vehicle_properties.index)
+        for car_object in cars:
+            self.add_render_angles(car_object)
 
-        if props.inverted_set:
-            self.add_render_angles(
-                context, True, general_props.number_of_animation_frames)
-
-        # Add rider peep frames
-        self.task_builder.set_recolorables(2)
-        self.task_builder.set_palette(self.palette_manager.get_rider_palette())
-        for i in range(general_props.number_of_rider_sets):
-            self.task_builder.set_layer("Riders {}".format(i + 1))
-
-            self.add_render_angles(
-                context, False, general_props.number_of_animation_frames)
-
-            if props.inverted_set:
-                self.add_render_angles(
-                    context, True, general_props.number_of_animation_frames)
+        bogies = [x for x in context.scene.objects if x.rct_graphics_helper_object_properties.object_type == "BOGIE"]
+        bogies = sorted(bogies, key=lambda x: x.rct_graphics_helper_vehicle_properties.index)
+        for bogie_object in bogies:
+            self.add_render_angles(bogie_object)
 
         return self.task_builder.create_task(context)
 
@@ -69,55 +58,52 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                 return props.sprite_track_flags[i]
             i += 1
 
-    def should_render_feature(self, key, context):
-        props = context.scene.rct_graphics_helper_vehicle_properties
-
-        inverted = False
+    def should_render_feature(self, key, props):
         if self.key_is_property(key, props):
             if self.property_value(key, props):
                 return True
-        elif key == "VEHICLE_SPRITE_FLAG_GENTLE_SLOPE_BANKED_TURNS" or key == "VEHICLE_SPRITE_FLAG_GENTLE_SLOPE_BANKED_TRANSITIONS":
-            if self.property_value("SLOPED_TURNS", props):
-                return True
-        elif key == "VEHICLE_SPRITE_FLAG_FLAT_TO_GENTLE_SLOPE_WHILE_BANKED_TRANSITIONS":
-            if self.property_value("SLOPED_TURNS", props) and self.property_value("VEHICLE_SPRITE_FLAG_FLAT_BANKED", props):
-                return True
-        elif key == "VEHICLE_SPRITE_FLAG_DIAGONAL_GENTLE_SLOPE_BANKED_TRANSITIONS":
-            if self.property_value("VEHICLE_SPRITE_FLAG_FLAT_BANKED", props) and self.property_value("VEHICLE_SPRITE_FLAG_DIAGONAL_SLOPES", props):
-                return True
-        elif key == "VEHICLE_SPRITE_FLAG_FLAT_TO_GENTLE_SLOPE_BANKED_TRANSITIONS":
-            if self.property_value("VEHICLE_SPRITE_FLAG_FLAT_BANKED", props) and self.property_value("VEHICLE_SPRITE_FLAG_GENTLE_SLOPES", props):
-                return True
-        elif key == "VEHICLE_SPRITE_FLAG_RESTRAINT_ANIMATION" and inverted == False:
-            if props.restraint_animation:
-                return True
         return False
 
-    def add_render_angles(self, context, is_inverted=False, animation_frames=1):
-        extra_roll = 0
-        if is_inverted:
-            extra_roll = 180
-
+    def add_render_angles(self, car_object):
+        props = car_object.rct_graphics_helper_vehicle_properties
+        animation_frames = props.number_of_animation_frames
         for i in range(len(track_angle_sections_names)):
             key = track_angle_sections_names[i]
-            if self.should_render_feature(key, context):
+            if self.should_render_feature(key, props):
                 track_sections = track_angle_sections[key]
                 for track_section in track_sections:
 
                     base_view_angle = 0
-                    if track_section[0]:
-                        base_view_angle = 45
                     self.task_builder.set_rotation(
-                        base_view_angle, -track_section[3] + extra_roll, track_section[2], track_section[4])
+                        base_view_angle, 0, vertical_angle=track_section[2])
 
-                    if key == "VEHICLE_SPRITE_FLAG_RESTRAINT_ANIMATION":
-                        for j in range(3):
-                            for k in range(track_section[1]):
-                                for l in range(animation_frames):
-                                    self.task_builder.set_rotation(
-                                        base_view_angle + k / track_section[1] * 360, -track_section[3] + extra_roll, track_section[2], track_section[4])
-                                    self.task_builder.add_viewing_angles(
-                                        1, animation_frames + j, 1)
-                    else:
-                        self.task_builder.add_viewing_angles(
-                            track_section[1], 0, animation_frames)
+                    num_viewing_angles = track_section[1]
+                    if not track_section[0]:
+                        if i == 0:
+                            num_viewing_angles = int(props.flat_viewing_angles)
+                        else:
+                            num_viewing_angles = int(props.sloped_viewing_angles)
+
+                    rotational_symmetry = props.rotational_symmetry
+
+                    if rotational_symmetry:
+                        num_viewing_angles = int(num_viewing_angles / 2)
+
+                    rotation_range = 180 if rotational_symmetry else 360
+
+                    start_output_index = self.task_builder.output_index
+
+                    for i in range(num_viewing_angles):
+                        number_of_animated_and_other_frames = animation_frames + props.braking_lights
+
+                        for j in range(animation_frames):
+                            frame_index = start_output_index + i * number_of_animated_and_other_frames + j
+                            self.task_builder.add_frame(
+                                    frame_index, num_viewing_angles, i, j, rotation_range, car_object)
+
+                        if props.braking_lights:
+                            self.task_builder.set_layer("Braking Lights")
+                            frame_index = start_output_index + i * number_of_animated_and_other_frames + animation_frames
+                            self.task_builder.add_frame(
+                                frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
+                            self.task_builder.set_layer("Editor")

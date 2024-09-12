@@ -50,14 +50,12 @@ class Init(bpy.types.Operator):
                                      False, False, False, False, False, False, False, False, False, False, False, False)
         editor_layer.use = True
 
-        for i in range(8):
-            riders_layer = self.create_render_layer(
-                context, "Riders {}".format(i + 1))
-            riders_layer.layers = (False, i == 0, i == 1, i == 2, i == 3, i == 4, i == 5, i == 6,
-                                   i == 7, False, False, False, False, False, False, False, False, False, False, False)
-            riders_layer.layers_zmask = (True, True, True, True, True, True, True, True, True,
+        braking_lights_layer = self.create_render_layer(context, "Braking Lights")
+        braking_lights_layer.layers = (False, True, False, False, False, False, False, False,
+                                   False, False, False, False, False, False, False, False, False, False, False, False)
+        braking_lights_layer.layers_zmask = (True, True, True, True, True, True, True, True, True,
                                          True, False, False, False, False, False, False, False, False, False, False)
-            riders_layer.use = False
+        braking_lights_layer.use = False
 
         self.delete_default_render_layer(context)
 

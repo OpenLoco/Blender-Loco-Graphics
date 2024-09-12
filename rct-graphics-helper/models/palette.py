@@ -15,30 +15,28 @@ from ..res.res import res_path
 
 palette_colors = [
     "black",
-    "gray",
-    "lavender_purple",
-    "violet_purple",
-    "blue",
-    "teal",
-    "yellow_green",
-    "sea_green",
-    "light_olive_green",
-    "dark_olive_green",
-    "lime_green",
+    "mutedOliveGreen",
+    "mutedDarkYellow",
     "yellow",
-    "bright_yellow",
+    "mutedDarkRed",
+    "mutedGrassGreen",
+    "mutedAvocadoGreen",
+    "green",
+    "mutedOrange",
+    "mutedPurple",
+    "blue",
+    "mutedSeaGreen",
+    "purple",
+    "red",
     "orange",
-    "salmon",
-    "sandy_brown",
-    "tan_brown",
-    "bordeaux_red",
-    "bright_red",
-    "magenta",
-    "animated_water",
-    "animated_water_sparkle",
-    "animated_chain",
-    "recolor_1",
-    "recolor_1_orct2",
+    "mutedDarkTeal",
+    "pink",
+    "brown",
+    "amber",
+    "gray",
+    "brightYellow",
+    "unusedHotPink",
+    "recolor_1_loco",
     "transparent",
 ]
 
@@ -54,49 +52,14 @@ palette_colors_details = {
         "Description": "4 extra gray tones",
         "default": True
     },
-    "lavender_purple": {
-        "title": "Lavender Purple",
-        "Description": "Lavender purple",
+    "mutedOliveGreen": {
+        "title": "Muted Olive Green",
+        "Description": "Muted olive green",
         "default": True
     },
-    "violet_purple": {
-        "title": "Violet Purple",
-        "Description": "Violet purple",
-        "default": True
-    },
-    "blue": {
-        "title": "Blue",
-        "Description": "Blue",
-        "default": True
-    },
-    "teal": {
-        "title": "Teal",
-        "Description": "Teal",
-        "default": True
-    },
-    "yellow_green": {
-        "title": "Yellow Green",
-        "Description": "Yellow green",
-        "default": True
-    },
-    "sea_green": {
-        "title": "Sea Green",
-        "Description": "Sea green",
-        "default": True
-    },
-    "light_olive_green": {
-        "title": "Light Olive Green",
-        "Description": "Light olive green",
-        "default": True
-    },
-    "dark_olive_green": {
-        "title": "Dark Olive Green",
-        "Description": "Dark olive green",
-        "default": True
-    },
-    "lime_green": {
-        "title": "Lime Green",
-        "Description": "Lime green",
+    "mutedDarkYellow": {
+        "title": "Muted Dark Yellow",
+        "Description": "Muted dark yellow",
         "default": True
     },
     "yellow": {
@@ -104,9 +67,54 @@ palette_colors_details = {
         "Description": "Yellow",
         "default": True
     },
-    "bright_yellow": {
-        "title": "Bright Yellow",
-        "Description": "3 extra bright yellow colors",
+    "mutedDarkRed": {
+        "title": "Muted Dark Red",
+        "Description": "Muted dark red",
+        "default": True
+    },
+    "mutedGrassGreen": {
+        "title": "Muted Grass Green",
+        "Description": "Muted grass green",
+        "default": True
+    },
+    "mutedAvocadoGreen": {
+        "title": "Muted Avocado Green",
+        "Description": "Muted avocado green",
+        "default": True
+    },
+    "green": {
+        "title": "Green",
+        "Description": "Green",
+        "default": True
+    },
+    "mutedOrange": {
+        "title": "Muted Orange",
+        "Description": "Muted orange",
+        "default": True
+    },
+    "mutedPurple": {
+        "title": "Muted Purple",
+        "Description": "Muted purple",
+        "default": True
+    },
+    "blue": {
+        "title": "Blue",
+        "Description": "Blue",
+        "default": True
+    },
+    "mutedSeaGreen": {
+        "title": "Muted Sea Green",
+        "Description": "Muted sea green",
+        "default": True
+    },
+    "purple": {
+        "title": "Purple",
+        "Description": "Purple",
+        "default": True
+    },
+    "red": {
+        "title": "Red",
+        "Description": "Red",
         "default": True
     },
     "orange": {
@@ -114,34 +122,34 @@ palette_colors_details = {
         "Description": "Orange",
         "default": True
     },
-    "salmon": {
-        "title": "Salmon",
-        "Description": "Salmon color used as the skin tone for peeps",
+    "mutedDarkTeal": {
+        "title": "Muted Dark Teal",
+        "Description": "Muted dark teal",
         "default": True
     },
-    "sandy_brown": {
-        "title": "Sandy Brown",
-        "Description": "Sandy brown",
+    "pink": {
+        "title": "Pink",
+        "Description": "Pink",
         "default": True
     },
-    "tan_brown": {
-        "title": "Tan Brown",
-        "Description": "Less satured brown color",
+    "brown": {
+        "title": "Brown",
+        "Description": "Brown",
         "default": True
     },
-    "bordeaux_red": {
-        "title": "Bordeaux Red",
-        "Description": "Bordeaux red",
+    "amber": {
+        "title": "Amber",
+        "Description": "Amber",
         "default": True
     },
-    "bright_red": {
-        "title": "Bright Red",
-        "Description": "Bright red",
+    "brightYellow": {
+        "title": "Bright Yellow",
+        "Description": "4 extra yellow tones",
         "default": True
     },
-    "magenta": {
-        "title": "Magenta",
-        "Description": "Magenta",
+    "unusedHotPink": {
+        "title": "Unused Hot Pink",
+        "Description": "Unused colour",
         "default": True
     },
     "transparent": {
@@ -149,29 +157,9 @@ palette_colors_details = {
         "Description": "Transparent",
         "default": True
     },
-    "animated_water": {
-        "title": "Animated Water",
-        "Description": "Colors used for the palette animated water",
-        "default": False
-    },
-    "animated_water_sparkle": {
-        "title": "Animated water Sparkle",
-        "Description": "Colors used for the palette animated water sparkles",
-        "default": False
-    },
-    "animated_chain": {
-        "title": "Animated Chain",
-        "Description": "Colors used for the palette animated chain lift",
-        "default": False
-    },
-    "recolor_1": {
-        "title": "Recolor 1 Clover",
-        "Description": "Clover green used by RCT Graphics Helper",
-        "default": False
-    },
-    "recolor_1_orct2": {
-        "title": "Recolor 1 Orange",
-        "Description": "Orange used by OpenRCT2 to import recolor 1",
+    "recolor_1_loco": {
+        "title": "Recolor 1 loco purple",
+        "Description": "Purple used by OpenLoco to import recolor 1",
         "default": False
     }
 }
@@ -238,6 +226,8 @@ class Palette:
 
         subprocess.check_output(cmd.get_command_string(
             renderer.magick_path, output_path), shell=True)
+        
+        print(output_path)
 
         self.path = output_path
         self.generated = True

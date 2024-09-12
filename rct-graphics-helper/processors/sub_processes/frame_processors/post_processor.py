@@ -52,8 +52,6 @@ class PostProcessor(SubProcessor):
             mask.id_mask(i + 1, 0, 0)
 
             palette = self.renderer.palette_manager.get_recolor_palette(i)
-            orct2_palette = self.renderer.palette_manager.get_orct2_recolor_palette(
-                i)
 
             forced_color_render = MagickCommand("mpr:render")
             forced_color_render.quantize(self.renderer.get_palette_path(
