@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Package Plugin
-        run: cd rct-graphics-helper; zip ../loco-graphics-helper.zip * -r
+        run: zip loco-graphics-helper.zip ./loco-graphics-helper/* -r
       - name: Upload artifacts (CI)
         uses: actions/upload-artifact@v4
         with:
