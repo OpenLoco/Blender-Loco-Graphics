@@ -277,6 +277,12 @@ class ObjectHelperPanel(bpy.types.Panel):
         row.label("Sloped Viewing Angles: 32")
         row = layout.row()
 
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "number_of_animation_frames")
+        row = layout.row()
+
         row.prop(vehicle_properties, "rotational_symmetry")
         row = layout.row()
 
@@ -316,14 +322,24 @@ class ObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "sloped_viewing_angles", text="")
         row = layout.row()
 
+        row.prop(vehicle_properties, "roll_angle")
+        row = layout.row()
+
         row.prop(vehicle_properties, "index")
         row = layout.row()
 
         row.prop(vehicle_properties, "number_of_animation_frames")
         row = layout.row()
 
+        if vehicle_properties.number_of_animation_frames != 1 and vehicle_properties.roll_angle != 0:
+            row.label("WARNING CANNOT HAVE BOTH ANIMATION FRAMES AND ROLL ANGLE SET")
+            row = layout.row()
+
         row.prop(vehicle_properties, "rotational_symmetry")
         row = layout.row()
 
         row.prop(vehicle_properties, "braking_lights")
         row = layout.row()
+        if vehicle_properties.braking_lights and vehicle_properties.roll_angle != 0:
+            row.label("WARNING CANNOT HAVE BOTH BRAKING LIGHTS AND ROLL ANGLE SET") 
+            row = layout.row()

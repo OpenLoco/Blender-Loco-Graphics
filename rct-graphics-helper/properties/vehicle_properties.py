@@ -80,6 +80,12 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default="32"
     )
 
+    roll_angle = bpy.props.IntProperty(
+        name="Roll/Tilt Angle",
+        description="If non-zero will render a +angle -angle roll image",
+        default=0,
+        min=0) 
+
     index = bpy.props.IntProperty(
         name="Car/Bogie Index",
         description="Controls the order of the cars/bogies",

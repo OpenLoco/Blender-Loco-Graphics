@@ -67,6 +67,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
     def add_render_angles(self, car_object):
         props = car_object.rct_graphics_helper_vehicle_properties
         animation_frames = props.number_of_animation_frames
+        roll_frames = 1 if props.roll_angle == 0 else 3
         for i in range(len(track_angle_sections_names)):
             key = track_angle_sections_names[i]
             if self.should_render_feature(key, props):
@@ -94,16 +95,24 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                     start_output_index = self.task_builder.output_index
 
                     for i in range(num_viewing_angles):
-                        number_of_animated_and_other_frames = animation_frames + props.braking_lights
-
-                        for j in range(animation_frames):
-                            frame_index = start_output_index + i * number_of_animated_and_other_frames + j
-                            self.task_builder.add_frame(
+                        if roll_frames != 1:
+                            roll_angles = [0, props.roll_angle, -props.roll_angle]
+                            for j, roll_angle in enumerate(roll_angles):
+                                frame_index = start_output_index + i * roll_frames + j
+                                self.task_builder.set_rotation(
+                                    base_view_angle, roll_angle, vertical_angle=track_section[2])
+                                self.task_builder.add_frame(
+                                    frame_index, num_viewing_angles, i, j, rotation_range, car_object)
+                        else:
+                            number_of_animated_and_other_frames = animation_frames + props.braking_lights
+                            for j in range(animation_frames):
+                                frame_index = start_output_index + i * number_of_animated_and_other_frames + j
+                                self.task_builder.add_frame(
                                     frame_index, num_viewing_angles, i, j, rotation_range, car_object)
 
-                        if props.braking_lights:
-                            self.task_builder.set_layer("Braking Lights")
-                            frame_index = start_output_index + i * number_of_animated_and_other_frames + animation_frames
-                            self.task_builder.add_frame(
-                                frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
-                            self.task_builder.set_layer("Editor")
+                            if props.braking_lights:
+                                self.task_builder.set_layer("Braking Lights")
+                                frame_index = start_output_index + i * number_of_animated_and_other_frames + animation_frames
+                                self.task_builder.add_frame(
+                                    frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
+                                self.task_builder.set_layer("Editor")
