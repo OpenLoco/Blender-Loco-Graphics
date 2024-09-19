@@ -1,10 +1,10 @@
 '''
-Copyright (c) 2022 RCT Graphics Helper developers
+Copyright (c) 2024 Loco Graphics Helper developers
 
 For a complete list of all authors, please refer to the addon's meta info.
-Interested in contributing? Visit https://github.com/oli414/Blender-RCT-Graphics
+Interested in contributing? Visit https://github.com/OpenLoco/Blender-Loco-Graphics
 
-RCT Graphics Helper is licensed under the GNU General Public License version 3.
+Loco Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
 import bpy
