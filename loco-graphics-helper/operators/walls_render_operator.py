@@ -15,8 +15,8 @@ from .render_operator import RCTRender
 
 
 class RenderWalls(RCTRender, bpy.types.Operator):
-    bl_idname = "render.rct_walls"
-    bl_label = "Render RCT Walls"
+    bl_idname = "render.loco_walls"
+    bl_label = "Render Loco Walls"
 
     def add_slopes_section(self, anim_frame, a_slope_frame_offset, b_slope_frame_offset):
         self.task_builder.set_offset(-14, -8)
@@ -80,8 +80,8 @@ class RenderWalls(RCTRender, bpy.types.Operator):
 
     def create_task(self, context):
         scene = context.scene
-        props = scene.rct_graphics_helper_walls_properties
-        general_props = scene.rct_graphics_helper_general_properties
+        props = scene.loco_graphics_helper_walls_properties
+        general_props = scene.loco_graphics_helper_general_properties
 
         # Create the list of frames with our parameters
         self.task_builder.clear()

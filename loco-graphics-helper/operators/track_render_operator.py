@@ -15,13 +15,13 @@ from .render_operator import RCTRender
 
 
 class RenderTrack(RCTRender, bpy.types.Operator):
-    bl_idname = "render.rct_track"
-    bl_label = "Render RCT Track"
+    bl_idname = "render.loco_track"
+    bl_label = "Render Loco Track"
 
     def create_task(self, context):
         scene = context.scene
-        props = scene.rct_graphics_helper_track_properties
-        general_props = scene.rct_graphics_helper_general_properties
+        props = scene.loco_graphics_helper_track_properties
+        general_props = scene.loco_graphics_helper_general_properties
 
         # Create the list of frames with our parameters
         self.task_builder.clear()

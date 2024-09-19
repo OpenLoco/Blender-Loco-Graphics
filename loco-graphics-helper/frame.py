@@ -87,7 +87,7 @@ class Frame:
             for o in bpy.data.scenes[0].objects:
                 if o == self.target_object:
                     continue
-                if o.rct_graphics_helper_object_properties.object_type == 'NONE':
+                if o.loco_graphics_helper_object_properties.object_type == 'NONE':
                     continue
                 o.hide_render = True
                 for c in o.children:

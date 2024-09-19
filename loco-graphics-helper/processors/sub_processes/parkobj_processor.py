@@ -26,11 +26,11 @@ class ParkobjProcessor(SubProcessor):
         self.renderer = renderer
 
     def applicable(self, master_context):
-        general_props = self.renderer.context.scene.rct_graphics_helper_general_properties
+        general_props = self.renderer.context.scene.loco_graphics_helper_general_properties
         return general_props.build_parkobj
 
     def process(self, master_context, callback=None):
-        general_props = self.renderer.context.scene.rct_graphics_helper_general_properties
+        general_props = self.renderer.context.scene.loco_graphics_helper_general_properties
         task = master_context.task
 
         images = self._read_sprite_manifest(task)

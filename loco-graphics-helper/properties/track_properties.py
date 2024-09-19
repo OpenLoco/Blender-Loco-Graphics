@@ -23,9 +23,9 @@ class TrackProperties(bpy.types.PropertyGroup):
 
 
 def register_track_properties():
-    bpy.types.Scene.rct_graphics_helper_track_properties = bpy.props.PointerProperty(
+    bpy.types.Scene.loco_graphics_helper_track_properties = bpy.props.PointerProperty(
         type=TrackProperties)
 
 
 def unregister_track_properties():
-    del bpy.types.Scene.rct_graphics_helper_track_properties
+    del bpy.types.Scene.loco_graphics_helper_track_properties

@@ -12,7 +12,7 @@ from bpy.types import AddonPreferences
 
 
 class RCTGraphicsHelperPreferences(AddonPreferences):
-    bl_idname = "rct-graphics-helper"
+    bl_idname = "loco-graphics-helper"
 
     orct2_directory = bpy.props.StringProperty(
         name="OpenRCT2 Path",

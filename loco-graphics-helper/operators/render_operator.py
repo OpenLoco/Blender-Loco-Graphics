@@ -49,7 +49,7 @@ class RCTRender(object):
         return None
 
     def execute(self, context):
-        general_props = context.scene.rct_graphics_helper_general_properties
+        general_props = context.scene.loco_graphics_helper_general_properties
 
         rotate_rig(0, 0, 0, 0)
         bpy.data.cameras["Camera"].ortho_scale = 169.72 / \
@@ -61,7 +61,7 @@ class RCTRender(object):
         def finish():
             general_props.rendering = False
             rotate_rig(0, 0, 0, 0)
-            print("RCT render has been completed")
+            print("Loco render has been completed")
 
         general_props.rendering = True
 

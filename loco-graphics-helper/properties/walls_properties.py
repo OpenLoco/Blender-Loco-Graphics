@@ -34,9 +34,9 @@ class WallsProperties(bpy.types.PropertyGroup):
 
 
 def register_walls_properties():
-    bpy.types.Scene.rct_graphics_helper_walls_properties = bpy.props.PointerProperty(
+    bpy.types.Scene.loco_graphics_helper_walls_properties = bpy.props.PointerProperty(
         type=WallsProperties)
 
 
 def unregister_walls_properties():
-    del bpy.types.Scene.rct_graphics_helper_walls_properties
+    del bpy.types.Scene.loco_graphics_helper_walls_properties

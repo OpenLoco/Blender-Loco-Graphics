@@ -18,8 +18,8 @@ from ..builders.compositor_builder import CompositorBuilder
 
 
 class Init(bpy.types.Operator):
-    bl_idname = "render.rct_init"
-    bl_label = "Initialize RCT graphics helper"
+    bl_idname = "render.loco_init"
+    bl_label = "Initialize Loco graphics helper"
 
     scene = None
     props = None

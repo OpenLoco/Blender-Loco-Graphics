@@ -58,7 +58,7 @@ class Renderer:
                                          context.scene.render.resolution_x)
 
         self.started_with_anti_aliasing = context.scene.render.use_antialiasing
-        context.scene.render.use_shadows = context.scene.rct_graphics_helper_general_properties.cast_shadows
+        context.scene.render.use_shadows = context.scene.loco_graphics_helper_general_properties.cast_shadows
 
         bpy.app.handlers.render_complete.append(self._render_finished)
         bpy.app.handlers.render_cancel.append(self._render_reset)

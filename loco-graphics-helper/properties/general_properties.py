@@ -131,9 +131,9 @@ class GeneralProperties(bpy.types.PropertyGroup):
 
 
 def register_general_properties():
-    bpy.types.Scene.rct_graphics_helper_general_properties = bpy.props.PointerProperty(
+    bpy.types.Scene.loco_graphics_helper_general_properties = bpy.props.PointerProperty(
         type=GeneralProperties)
 
 
 def unregister_general_properties():
-    del bpy.types.Scene.rct_graphics_helper_general_properties
+    del bpy.types.Scene.loco_graphics_helper_general_properties

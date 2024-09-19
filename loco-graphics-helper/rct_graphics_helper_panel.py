@@ -25,7 +25,7 @@ from .models.palette import palette_colors, palette_colors_details
 
 class RepairConfirmOperator(bpy.types.Operator):
     """This action will clear out the default camera and light. Changes made to the rig object, compositor nodes and recolorable materials will be lost."""
-    bl_idname = "rct_graphics_helper.repair_confirm"
+    bl_idname = "loco_graphics_helper.repair_confirm"
     bl_label = "Do you want to (re)create the base scene?"
     bl_options = {'REGISTER', 'INTERNAL'}
     
@@ -34,18 +34,18 @@ class RepairConfirmOperator(bpy.types.Operator):
         return True
     
     def execute(self, context):
-        bpy.ops.render.rct_init()
+        bpy.ops.render.loco_init()
         return {'FINISHED'}
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
 
 class GraphicsHelperPanel(bpy.types.Panel):
-    bl_label = "RCT Graphics Helper"
-    bl_idname = "VIEW3D_PT_rct_graphics_helper"
+    bl_label = "Loco Graphics Helper"
+    bl_idname = "VIEW3D_PT_loco_graphics_helper"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
-    bl_category = 'RCT Tools'
+    bl_category = 'Loco Tools'
 
     def draw(self, context):
 
@@ -53,14 +53,14 @@ class GraphicsHelperPanel(bpy.types.Panel):
         scene = context.scene
 
         row = layout.row()
-        row.operator("rct_graphics_helper.repair_confirm", text="Initialize / Repair")
+        row.operator("loco_graphics_helper.repair_confirm", text="Initialize / Repair")
 
         if not "Rig" in context.scene.objects:
             return
 
         # General properties
 
-        properties = scene.rct_graphics_helper_general_properties
+        properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
         row.separator()
@@ -153,8 +153,8 @@ class GraphicsHelperPanel(bpy.types.Panel):
             box.prop(properties, "copy_parkobj_to_orct2")
 
     def draw_tiles_panel(self, scene, layout):
-        properties = scene.rct_graphics_helper_static_properties
-        general_properties = scene.rct_graphics_helper_general_properties
+        properties = scene.loco_graphics_helper_static_properties
+        general_properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
         row.prop(properties, "viewing_angles")
@@ -171,11 +171,11 @@ class GraphicsHelperPanel(bpy.types.Panel):
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.rct_static", text=text)
+        row.operator("render.loco_static", text=text)
 
     def draw_walls_panel(self, scene, layout):
-        properties = scene.rct_graphics_helper_walls_properties
-        general_properties = scene.rct_graphics_helper_general_properties
+        properties = scene.loco_graphics_helper_walls_properties
+        general_properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
         row.prop(properties, "sloped")
@@ -190,17 +190,17 @@ class GraphicsHelperPanel(bpy.types.Panel):
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.rct_walls", text=text)
+        row.operator("render.loco_walls", text=text)
 
     def draw_track_panel(self, scene, layout):
-        properties = scene.rct_graphics_helper_track_properties
-        general_properties = scene.rct_graphics_helper_general_properties
+        properties = scene.loco_graphics_helper_track_properties
+        general_properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
         row.label("Work in progress")
         
         #row = layout.row()
-        #row.operator("render.rct_track", text="Generate Splines")
+        #row.operator("render.loco_track", text="Generate Splines")
         #
         #row = layout.row()
         #row.prop(properties, "placeholder")
@@ -210,28 +210,28 @@ class GraphicsHelperPanel(bpy.types.Panel):
         #    text = "Render"
         #    if general_properties.rendering:
         #        text = "Failed"
-        #    row.operator("render.rct_track", text=text)
+        #    row.operator("render.loco_track", text=text)
 
     def draw_vehicle_panel(self, scene, layout):
-        general_properties = scene.rct_graphics_helper_general_properties
+        general_properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
 
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.rct_vehicle", text=text)
+        row.operator("render.loco_vehicle", text=text)
 
 class ObjectHelperPanel(bpy.types.Panel):
     bl_label = "Loco Graphics"
-    bl_idname = "OBJECT_PT_tester"
+    bl_idname = "OBJECT_PT_loco_graphics_helper.objects"
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'object'
 
     def draw(self, context):
         layout = self.layout
-        object_properties = context.object.rct_graphics_helper_object_properties
+        object_properties = context.object.loco_graphics_helper_object_properties
 
         row = layout.row()
         row.prop(object_properties, "object_type")
@@ -247,14 +247,14 @@ class ObjectHelperPanel(bpy.types.Panel):
 
     def draw_bogie_panel(self, context, layout):
         scene = context.scene
-        general_properties = scene.rct_graphics_helper_general_properties
+        general_properties = scene.loco_graphics_helper_general_properties
         row = layout.row()
 
         if not general_properties.render_mode == "VEHICLE":
             row.label("Vehicle Render Mode Required")
             return
 
-        vehicle_properties = context.object.rct_graphics_helper_vehicle_properties
+        vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
         box = layout.box()
 
@@ -288,14 +288,14 @@ class ObjectHelperPanel(bpy.types.Panel):
 
     def draw_car_panel(self, context, layout):
         scene = context.scene
-        general_properties = scene.rct_graphics_helper_general_properties
+        general_properties = scene.loco_graphics_helper_general_properties
         row = layout.row()
 
         if not general_properties.render_mode == "VEHICLE":
             row.label("Vehicle Render Mode Required")
             return
 
-        vehicle_properties = context.object.rct_graphics_helper_vehicle_properties
+        vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
         box = layout.box()
 

@@ -16,11 +16,11 @@ from ..angle_sections.track import track_angle_sections, track_angle_sections_na
 
 
 class RenderVehicle(RCTRender, bpy.types.Operator):
-    bl_idname = "render.rct_vehicle"
-    bl_label = "Render RCT Vehicle"
+    bl_idname = "render.loco_vehicle"
+    bl_label = "Render Loco Vehicle"
 
     def create_task(self, context):
-        general_props = context.scene.rct_graphics_helper_general_properties
+        general_props = context.scene.loco_graphics_helper_general_properties
 
         self.task_builder.clear()
         self.task_builder.set_anti_aliasing_with_background(
@@ -34,13 +34,13 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        cars = [x for x in context.scene.objects if x.rct_graphics_helper_object_properties.object_type == "CAR"]
-        cars = sorted(cars, key=lambda x: x.rct_graphics_helper_vehicle_properties.index)
+        cars = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
+        cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         for car_object in cars:
             self.add_render_angles(car_object)
 
-        bogies = [x for x in context.scene.objects if x.rct_graphics_helper_object_properties.object_type == "BOGIE"]
-        bogies = sorted(bogies, key=lambda x: x.rct_graphics_helper_vehicle_properties.index)
+        bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+        bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         for bogie_object in bogies:
             self.add_render_angles(bogie_object)
 
@@ -65,7 +65,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         return False
 
     def add_render_angles(self, car_object):
-        props = car_object.rct_graphics_helper_vehicle_properties
+        props = car_object.loco_graphics_helper_vehicle_properties
         animation_frames = props.number_of_animation_frames
         roll_frames = 1 if props.roll_angle == 0 else 3
         for i in range(len(track_angle_sections_names)):

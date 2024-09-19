@@ -15,13 +15,13 @@ from .render_operator import RCTRender
 
 
 class RenderTiles(RCTRender, bpy.types.Operator):
-    bl_idname = "render.rct_static"
-    bl_label = "Render RCT Static"
+    bl_idname = "render.loco_static"
+    bl_label = "Render Loco Static"
 
     def create_task(self, context):
         scene = context.scene
-        props = scene.rct_graphics_helper_static_properties
-        general_props = scene.rct_graphics_helper_general_properties
+        props = scene.loco_graphics_helper_static_properties
+        general_props = scene.loco_graphics_helper_general_properties
 
         # Create the list of frames with our parameters
         self.task_builder.clear()

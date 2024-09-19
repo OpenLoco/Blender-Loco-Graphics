@@ -24,11 +24,11 @@ class GXProcessor(SubProcessor):
         self.renderer = renderer
 
     def applicable(self, master_context):
-        general_props = self.renderer.context.scene.rct_graphics_helper_general_properties
+        general_props = self.renderer.context.scene.loco_graphics_helper_general_properties
         return general_props.build_gx
 
     def process(self, master_context, callback=None):
-        general_props = self.renderer.context.scene.rct_graphics_helper_general_properties
+        general_props = self.renderer.context.scene.loco_graphics_helper_general_properties
         task = master_context.task
         manifest_file_path = os.path.join(
             task.get_output_folder(), "sprites.json")
@@ -45,7 +45,7 @@ class GXProcessor(SubProcessor):
         if not general_props.build_assetpack:
             return
 
-        addon_prefs = task.context.user_preferences.addons["rct-graphics-helper"].preferences
+        addon_prefs = task.context.user_preferences.addons["loco-graphics-helper"].preferences
 
         if addon_prefs.opengraphics_directory == "":
             raise Exception(

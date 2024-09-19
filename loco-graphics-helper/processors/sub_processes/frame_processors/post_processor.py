@@ -122,7 +122,7 @@ class PostProcessor(SubProcessor):
                 result, output_index, output_path)
 
             output_info.offset_y -= self.renderer.lens_shift_y_offset
-            output_info.offset_y += self.renderer.context.scene.rct_graphics_helper_general_properties.y_offset
+            output_info.offset_y += self.renderer.context.scene.loco_graphics_helper_general_properties.y_offset
 
             output_info.offset_x += frame.offset_x
             output_info.offset_y += frame.offset_y
@@ -182,7 +182,7 @@ class PostProcessor(SubProcessor):
                 output_info.offset_y += dy
 
                 output_info.offset_y -= self.renderer.lens_shift_y_offset
-                output_info.offset_y += self.renderer.context.scene.rct_graphics_helper_general_properties.y_offset
+                output_info.offset_y += self.renderer.context.scene.loco_graphics_helper_general_properties.y_offset
 
                 output_info.offset_x += frame.offset_x
                 output_info.offset_y += frame.offset_y

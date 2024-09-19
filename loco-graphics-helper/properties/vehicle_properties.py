@@ -112,9 +112,9 @@ class VehicleProperties(bpy.types.PropertyGroup):
 
 
 def register_vehicles_properties():
-    bpy.types.Object.rct_graphics_helper_vehicle_properties = bpy.props.PointerProperty(
+    bpy.types.Object.loco_graphics_helper_vehicle_properties = bpy.props.PointerProperty(
         type=VehicleProperties)
 
 
 def unregister_vehicles_properties():
-    del bpy.types.Object.rct_graphics_helper_vehicle_properties
+    del bpy.types.Object.loco_graphics_helper_vehicle_properties
