@@ -211,19 +211,64 @@ class GraphicsHelperPanel(bpy.types.Panel):
         #    if general_properties.rendering:
         #        text = "Failed"
         #    row.operator("render.loco_track", text=text)
+    @staticmethod
+    def get_number_of_sprites(object):
+        props = object.loco_graphics_helper_vehicle_properties
+
+        multiplier = props.number_of_animation_frames
+        if props.roll_angle != 0:
+            multiplier = 3
+        elif props.braking_lights:
+            multiplier = multiplier + 1
+        if props.rotational_symmetry:
+            multiplier = multiplier / 2
+
+        num_sprites = 0
+        if props.sprite_track_flags[0]:
+            num_sprites = int(props.flat_viewing_angles) * multiplier
+        if props.sprite_track_flags[1]:
+            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + 8) * multiplier
+        if props.sprite_track_flags[2]:
+            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + 8) * multiplier
+        return int(num_sprites)
 
     def draw_vehicle_panel(self, scene, layout):
         general_properties = scene.loco_graphics_helper_general_properties
         cars = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
+        cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+        bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+
+        total_number_of_sprites = 0
+
+        if len(cars) > 0:
+            row = layout.row()
+            row.label("Car(s) details:")
+            for idx, car in enumerate(cars):
+                row = layout.row()
+                number_of_sprites = self.get_number_of_sprites(car)
+                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, car.name, number_of_sprites))
+                total_number_of_sprites = total_number_of_sprites + number_of_sprites
+
+        if len(bogies) > 0:
+            row = layout.row()
+            row.label("Bogie(s) details:")
+            for idx, bogie in enumerate(bogies):
+                row = layout.row()
+                number_of_sprites = self.get_number_of_sprites(bogie)
+                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, bogie.name, number_of_sprites))
+                total_number_of_sprites = total_number_of_sprites + number_of_sprites
 
         row = layout.row()
-        row.label("Number of Cars: {}".format(len(cars)))
-        row = layout.row()
-        row.label("Number of Bogies: {}".format(len(bogies)))
+        row.label("Total number of sprites: {}".format(total_number_of_sprites))
+
+        if total_number_of_sprites == 0:
+            row = layout.row()
+            row.label("NO CARS OR BOGIES SET!")
+            row = layout.row()
+            row.label("NOTHING WILL BE RENDERED!")
 
         row = layout.row()
-
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
