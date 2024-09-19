@@ -25,7 +25,7 @@ class MaterialsBuilder(NodesBuilder):
     def build(self, context):
         self.create_world_position_material(context)
 
-        self.create_recolorable_material("Recolorable 1", (0.1, 0.9, 0.3), 1)
+        self.create_recolorable_material("Recolorable 1", (0.4, 0.3, 0.5), 1)
         self.create_recolorable_material("Recolorable 2", (0.9, 0.1, 0.4), 2)
 
     def create_recolorable_material(self, name, color, pass_index):

@@ -17,8 +17,8 @@ def object_type_update_func(self, context):
         props = object.loco_graphics_helper_vehicle_properties
         props.flat_viewing_angles = "32"
         props.sloped_viewing_angles = "32"
+        props.roll_angle = 0
         props.braking_lights = False
-        props.number_of_animation_frames = 1
 
     # Reset to default for cars
     if object.loco_graphics_helper_object_properties.object_type == "CAR":
