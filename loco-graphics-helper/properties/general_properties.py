@@ -13,6 +13,13 @@ import os
 
 from ..models.palette import palette_colors, palette_colors_details
 
+def render_mode_update_func(self, context):
+    scene = context.scene
+    props = scene.loco_graphics_helper_general_properties
+    
+    # Vehicles **always** draw in game with 2 recolorables
+    if props.render_mode == "VEHICLE":
+        props.number_of_recolorables = 2
 
 class GeneralProperties(bpy.types.PropertyGroup):
     script_file = os.path.realpath(__file__)
@@ -96,7 +103,8 @@ class GeneralProperties(bpy.types.PropertyGroup):
              "Renders a wall piece.", 3),
             ("TRACK", "Track",
              "Renders track pieces.", 4)
-        )
+        ),
+        update=render_mode_update_func
     )
 
     rendering = bpy.props.BoolProperty(

@@ -66,8 +66,10 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
     def add_render_angles(self, car_object):
         props = car_object.loco_graphics_helper_vehicle_properties
+        is_bogie = car_object.loco_graphics_helper_object_properties.object_type == "BOGIE"
         animation_frames = props.number_of_animation_frames
         roll_frames = 1 if props.roll_angle == 0 else 3
+        
         for i in range(len(track_angle_sections_names)):
             key = track_angle_sections_names[i]
             if self.should_render_feature(key, props):
@@ -79,6 +81,10 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                         base_view_angle, 0, vertical_angle=track_section[2])
 
                     num_viewing_angles = track_section[1]
+                    if track_section[0] and is_bogie:
+                        # Bogies have no transition sprites
+                        continue
+
                     if not track_section[0]:
                         if i == 0:
                             num_viewing_angles = int(props.flat_viewing_angles)

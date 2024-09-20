@@ -213,6 +213,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
         #    row.operator("render.loco_track", text=text)
     @staticmethod
     def get_number_of_sprites(object):
+        is_bogie = object.loco_graphics_helper_object_properties.object_type == "BOGIE"
         props = object.loco_graphics_helper_vehicle_properties
 
         multiplier = props.number_of_animation_frames
@@ -223,13 +224,14 @@ class GraphicsHelperPanel(bpy.types.Panel):
         if props.rotational_symmetry:
             multiplier = multiplier / 2
 
+        num_transition_sprites = 0 if is_bogie else 4 + 4
         num_sprites = 0
         if props.sprite_track_flags[0]:
             num_sprites = int(props.flat_viewing_angles) * multiplier
         if props.sprite_track_flags[1]:
-            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + 8) * multiplier
+            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + num_transition_sprites) * multiplier
         if props.sprite_track_flags[2]:
-            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + 8) * multiplier
+            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + num_transition_sprites) * multiplier
         return int(num_sprites)
 
     def draw_vehicle_panel(self, scene, layout):

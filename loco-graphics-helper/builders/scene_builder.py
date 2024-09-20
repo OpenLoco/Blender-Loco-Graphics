@@ -73,11 +73,13 @@ class SceneBuilder:
         dome_light_obj.parent = vertical_joint_obj
 
         # Environment lighting
-        bpy.data.worlds["World"].light_settings.use_environment_light = True
-        bpy.data.worlds["World"].light_settings.environment_energy = 0.15
-        bpy.data.worlds["World"].light_settings.gather_method = "RAYTRACE"
-        bpy.data.worlds["World"].light_settings.distance = 0
-        bpy.data.worlds["World"].light_settings.samples = 1
+        light_settings = scene.world.light_settings
+        light_settings.use_ambient_occlusion = False
+        light_settings.use_environment_light = True
+        light_settings.environment_energy = 0.15
+        light_settings.gather_method = "RAYTRACE"
+        light_settings.distance = 0
+        light_settings.samples = 1
 
     def create_camera(self, context):
         name = self.prefix + "Camera" + self.suffix
