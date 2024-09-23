@@ -90,8 +90,11 @@ class SceneBuilder:
         light_settings.distance = 0
         light_settings.samples = 1
 
-        bpy.ops.mesh.primitive_plane_add(location=(0,0,0), radius=20)
-        shadow_catcher = bpy.context.active_object
+        if not "ShadowCatcher" in context.scene.objects:
+            bpy.ops.mesh.primitive_plane_add(location=(0,0,0), radius=20)
+            shadow_catcher = bpy.context.active_object
+        else:
+            shadow_catcher = context.scene.objects["ShadowCatcher"]
         shadow_catcher.name = "ShadowCatcher"
         shadow_catcher.layers[2] = True
         shadow_catcher.layers[0] = False

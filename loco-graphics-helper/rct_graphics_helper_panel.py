@@ -234,7 +234,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
             num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + num_transition_sprites) * multiplier
         
         if props.is_airplane:
-            num_sprites = num_sprites + int(props.flat_viewing_angles) * multiplier
+            num_sprites = num_sprites + int(props.flat_viewing_angles) * multiplier / 2
         return int(num_sprites)
 
     def draw_vehicle_panel(self, scene, layout):

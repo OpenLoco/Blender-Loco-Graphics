@@ -53,6 +53,12 @@ recolor_2_palette = Palette(os.path.join(
     "transparent"
 ])
 
+shadow_palette = Palette(os.path.join(
+    palette_base_path, "shadow_palette.png"), [
+    "shadowGrey", 
+    "transparent"
+])
+
 custom_palette = Palette(os.path.join(
     palette_base_path, "custom_palette.bmp"), [
     "yellow",
@@ -98,3 +104,6 @@ class PaletteManager:
     def set_custom_palette(self, colors):
         custom_palette.clear()
         custom_palette.add_colors(colors)
+
+    def get_shadow_palette(self):
+        return shadow_palette

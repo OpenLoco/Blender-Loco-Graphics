@@ -44,6 +44,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         if cars[0].loco_graphics_helper_vehicle_properties.is_airplane:
             self.task_builder.set_cast_shadows(
                 True)
+            self.task_builder.set_palette(self.palette_manager.get_shadow_palette())
             self.add_airplane_shadow_render_angles(cars[0])
         else:
             bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
@@ -74,6 +75,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
     def add_render_angles(self, car_object):
         props = car_object.loco_graphics_helper_vehicle_properties
         is_bogie = car_object.loco_graphics_helper_object_properties.object_type == "BOGIE"
+        target_object = car_object
         animation_frames = props.number_of_animation_frames
         roll_frames = 1 if props.roll_angle == 0 else 3
         
@@ -107,6 +109,14 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
                     start_output_index = self.task_builder.output_index
 
+                    
+                    if track_section[2] < 0 and props.is_airplane:
+                        # We don't want to render anything so we are setting the target
+                        # to the rig (could use anything though that can't render)
+                        target_object = bpy.data.objects['Rig']
+                    else:
+                        target_object = car_object
+
                     for i in range(num_viewing_angles):
                         if roll_frames != 1:
                             roll_angles = [0, props.roll_angle, -props.roll_angle]
@@ -115,19 +125,19 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                                 self.task_builder.set_rotation(
                                     base_view_angle, roll_angle, vertical_angle=track_section[2])
                                 self.task_builder.add_frame(
-                                    frame_index, num_viewing_angles, i, j, rotation_range, car_object)
+                                    frame_index, num_viewing_angles, i, j, rotation_range, target_object)
                         else:
                             number_of_animated_and_other_frames = animation_frames + props.braking_lights
                             for j in range(animation_frames):
                                 frame_index = start_output_index + i * number_of_animated_and_other_frames + j
                                 self.task_builder.add_frame(
-                                    frame_index, num_viewing_angles, i, j, rotation_range, car_object)
+                                    frame_index, num_viewing_angles, i, j, rotation_range, target_object)
 
                             if props.braking_lights:
                                 self.task_builder.set_layer("Braking Lights")
                                 frame_index = start_output_index + i * number_of_animated_and_other_frames + animation_frames
                                 self.task_builder.add_frame(
-                                    frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
+                                    frame_index, num_viewing_angles, i, 0, rotation_range, target_object)
                                 self.task_builder.set_layer("Editor")
 
     def add_airplane_shadow_render_angles(self, car_object):
@@ -140,7 +150,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
             self.task_builder.set_rotation(
                 base_view_angle, 0, vertical_angle=track_section[2])
 
-            num_viewing_angles = int(props.flat_viewing_angles)
+            num_viewing_angles = int(int(props.flat_viewing_angles) / 2)
 
             rotational_symmetry = props.rotational_symmetry
 
