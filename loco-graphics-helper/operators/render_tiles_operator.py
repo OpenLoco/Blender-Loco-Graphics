@@ -34,6 +34,9 @@ class RenderTiles(RCTRender, bpy.types.Operator):
         self.task_builder.set_recolorables(
             general_props.number_of_recolorables)
 
+        self.task_builder.set_cast_shadows(
+            general_props.cast_shadows)
+
         self.task_builder.set_size(
             props.object_width, props.object_length, props.invert_tile_positions)
 

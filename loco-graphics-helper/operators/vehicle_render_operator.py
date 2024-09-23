@@ -31,6 +31,8 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         # Add vehicle frames
         self.task_builder.set_recolorables(
             general_props.number_of_recolorables)
+        self.task_builder.set_cast_shadows(
+            general_props.cast_shadows)
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
@@ -39,10 +41,15 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         for car_object in cars:
             self.add_render_angles(car_object)
 
-        bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
-        bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
-        for bogie_object in bogies:
-            self.add_render_angles(bogie_object)
+        if cars[0].loco_graphics_helper_vehicle_properties.is_airplane:
+            self.task_builder.set_cast_shadows(
+                True)
+            self.add_airplane_shadow_render_angles(cars[0])
+        else:
+            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+            bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+            for bogie_object in bogies:
+                self.add_render_angles(bogie_object)
 
         return self.task_builder.create_task(context)
 
@@ -122,3 +129,31 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                                 self.task_builder.add_frame(
                                     frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
                                 self.task_builder.set_layer("Editor")
+
+    def add_airplane_shadow_render_angles(self, car_object):
+        props = car_object.loco_graphics_helper_vehicle_properties
+        
+        track_sections = track_angle_sections["VEHICLE_SPRITE_FLAG_FLAT"]
+        for track_section in track_sections:
+
+            base_view_angle = 0
+            self.task_builder.set_rotation(
+                base_view_angle, 0, vertical_angle=track_section[2])
+
+            num_viewing_angles = int(props.flat_viewing_angles)
+
+            rotational_symmetry = props.rotational_symmetry
+
+            if rotational_symmetry:
+                num_viewing_angles = int(num_viewing_angles / 2)
+
+            rotation_range = 180 if rotational_symmetry else 360
+
+            start_output_index = self.task_builder.output_index
+
+            for i in range(num_viewing_angles):
+                self.task_builder.set_layer("Top Down Shadow")
+                frame_index = start_output_index + i
+                self.task_builder.add_frame(
+                    frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
+                self.task_builder.set_layer("Editor")

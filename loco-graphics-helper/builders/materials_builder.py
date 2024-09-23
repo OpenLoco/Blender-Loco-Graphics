@@ -28,6 +28,8 @@ class MaterialsBuilder(NodesBuilder):
         self.create_recolorable_material("Recolorable 1", (0.4, 0.3, 0.5), 1)
         self.create_recolorable_material("Recolorable 2", (0.9, 0.1, 0.4), 2)
 
+        self.create_shadow_capture_material("Shadow Capture")
+
     def create_recolorable_material(self, name, color, pass_index):
         material = self.create_material(name)
 
@@ -40,6 +42,17 @@ class MaterialsBuilder(NodesBuilder):
         material.specular_shader = "PHONG"
 
         material.pass_index = pass_index
+
+        return material
+
+    def create_shadow_capture_material(self, name):
+        material = self.create_material(name)
+
+        material.diffuse_color = (0.8, 0.8, 0.8)
+        material.diffuse_intensity = 1
+
+        material.use_only_shadow = True
+        material.shadow_only_type = 'SHADOW_ONLY'
 
         return material
 

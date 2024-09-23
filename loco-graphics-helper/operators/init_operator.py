@@ -57,17 +57,26 @@ class Init(bpy.types.Operator):
                                          True, False, False, False, False, False, False, False, False, False, False)
         braking_lights_layer.use = False
 
+        braking_lights_layer = self.create_render_layer(context, "Top Down Shadow")
+        braking_lights_layer.layers = (False, False, True, False, False, False, False, False,
+                                   False, False, False, False, False, False, False, False, False, False, False, False)
+        braking_lights_layer.layers_zmask = (False, False, True, False, False, False, False, False, False,
+                                         False, False, False, False, False, False, False, False, False, False, False)
+        braking_lights_layer.use = False
+
         self.delete_default_render_layer(context)
 
         # Create dependencies in the context
+
+        # Materials used in scene builder so do this first
+        materialsBuilder = MaterialsBuilder()
+        materialsBuilder.build(context)
+
         sceneBuilder = SceneBuilder()
         sceneBuilder.build(context)
 
         compositorBuilder = CompositorBuilder()
         compositorBuilder.build(context)
-
-        materialsBuilder = MaterialsBuilder()
-        materialsBuilder.build(context)
 
         return {'FINISHED'}
 

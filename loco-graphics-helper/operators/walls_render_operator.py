@@ -94,6 +94,9 @@ class RenderWalls(RCTRender, bpy.types.Operator):
         self.task_builder.set_recolorables(
             general_props.number_of_recolorables)
 
+        self.task_builder.set_cast_shadows(
+            general_props.cast_shadows)
+
         sloped_a_anim_frame = general_props.number_of_animation_frames
         sloped_b_anim_frame = general_props.number_of_animation_frames * 2
 

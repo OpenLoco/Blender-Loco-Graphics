@@ -71,6 +71,15 @@ class SceneBuilder:
 
         scene.objects.link(dome_light_obj)
         dome_light_obj.parent = vertical_joint_obj
+        
+        # Airplane shadows light
+        airplane_light_obj = self.create_airplane_shadow_light(context)
+
+        b = scene.objects.link(airplane_light_obj)
+        airplane_light_obj.parent = vertical_joint_obj
+        airplane_light_obj.layers[2] = True
+        airplane_light_obj.layers[0] = False
+        print(airplane_light_obj.layers[0])
 
         # Environment lighting
         light_settings = scene.world.light_settings
@@ -80,6 +89,15 @@ class SceneBuilder:
         light_settings.gather_method = "RAYTRACE"
         light_settings.distance = 0
         light_settings.samples = 1
+
+        bpy.ops.mesh.primitive_plane_add(location=(0,0,0), radius=20)
+        shadow_catcher = bpy.context.active_object
+        shadow_catcher.name = "ShadowCatcher"
+        shadow_catcher.layers[2] = True
+        shadow_catcher.layers[0] = False
+        shadow_catcher.hide = True
+        shadow_catcher.hide_select = True
+        shadow_catcher.data.materials.append(bpy.data.materials.get("Shadow Capture"))
 
     def create_camera(self, context):
         name = self.prefix + "Camera" + self.suffix
@@ -160,6 +178,27 @@ class SceneBuilder:
         lamp_object = self.create_scene_object(context, 'LightDome', lamp_data)
         lamp_object.hide = True
         lamp_object.hide_select = True
+
+        return lamp_object
+
+    def create_airplane_shadow_light(self, context):
+        lamp_data = self.create_lamp_data(context, "AirplaneShadowLight", "SUN")
+
+        lamp_data.energy = 1.3
+        lamp_data.use_specular = True
+        lamp_data.use_diffuse = True
+        lamp_data.shadow_method = "RAY_SHADOW"
+        lamp_data.shadow_ray_sample_method = "ADAPTIVE_QMC"
+        lamp_data.shadow_ray_samples = 4
+        lamp_data.shadow_soft_size = 0.5
+        lamp_data.shadow_adaptive_threshold = 0.001
+
+        lamp_object = self.create_scene_object(context, 'AirplaneShadowLight', lamp_data)
+
+        lamp_object.hide = True
+        lamp_object.hide_select = True
+        lamp_object.location = (0, 0, 0)
+        lamp_object.rotation_euler = (math.radians(0), 0, math.radians(90))
 
         return lamp_object
 

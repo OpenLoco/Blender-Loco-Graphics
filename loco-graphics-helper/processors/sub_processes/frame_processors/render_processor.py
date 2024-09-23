@@ -35,6 +35,8 @@ class RenderProcessor(SubProcessor):
 
         self.renderer.set_aa(frame.use_anti_aliasing)
         self.renderer.set_aa_with_background(frame.anti_alias_with_background)
+        
+        self.renderer.set_cast_shadows(frame.cast_shadows)
 
         self.renderer.set_animation_frame(frame.animation_frame_index)
 

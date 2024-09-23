@@ -110,6 +110,12 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default=False
     )
 
+    is_airplane = bpy.props.BoolProperty(
+        name="Is an airplane",
+        description="If airplane will render airplane shadows (bogie)",
+        default=False
+    )
+
 
 def register_vehicles_properties():
     bpy.types.Object.loco_graphics_helper_vehicle_properties = bpy.props.PointerProperty(

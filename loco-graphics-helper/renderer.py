@@ -58,7 +58,6 @@ class Renderer:
                                          context.scene.render.resolution_x)
 
         self.started_with_anti_aliasing = context.scene.render.use_antialiasing
-        context.scene.render.use_shadows = context.scene.loco_graphics_helper_general_properties.cast_shadows
 
         bpy.app.handlers.render_complete.append(self._render_finished)
         bpy.app.handlers.render_cancel.append(self._render_reset)
@@ -140,6 +139,7 @@ class Renderer:
     def set_override_material(self, material):
         self.context.scene.render.layers["Editor"].material_override = material
         self.context.scene.render.layers["Braking Lights"].material_override = material
+        self.context.scene.render.layers["Top Down Shadow"].material_override = material
 
     def set_multi_tile_size(self, width, length):
         width_node = None
@@ -158,7 +158,7 @@ class Renderer:
 
     # Sets the active render layer
     def set_layer(self, layer_name):
-        layers = ["Editor", "Braking Lights"]
+        layers = ["Editor", "Braking Lights", "Top Down Shadow"]
 
         for layer in layers:
             self.context.scene.render.layers[layer].use = False
@@ -175,6 +175,9 @@ class Renderer:
 
     def set_animation_frame(self, animation_frame_index):
         self.context.scene.frame_set(animation_frame_index)
+
+    def set_cast_shadows(self, cast_shadows):
+        self.context.scene.render.use_shadows = cast_shadows
 
     # Sets the still render output path
     def set_output_path(self, path):

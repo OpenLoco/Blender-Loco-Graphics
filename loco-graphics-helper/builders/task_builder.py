@@ -38,6 +38,8 @@ class TaskBuilder:
 
         self.recolorables = 0
 
+        self.cast_shadows = True
+
         self.layer = "Editor"
 
         self.palette = None
@@ -66,6 +68,8 @@ class TaskBuilder:
         frame.set_offset(self.offset_x, self.offset_y)
 
         frame.set_recolorables(self.recolorables)
+
+        frame.set_cast_shadows(self.cast_shadows)
 
         frame.set_layer(self.layer)
 
@@ -103,6 +107,8 @@ class TaskBuilder:
                 frame.set_offset(self.offset_x, self.offset_y)
 
                 frame.set_recolorables(self.recolorables)
+
+                frame.set_cast_shadows(self.cast_shadows)
 
                 frame.set_layer(self.layer)
 
@@ -145,6 +151,10 @@ class TaskBuilder:
     # Sets the number of recolorable materials
     def set_recolorables(self, number_of_recolorables):
         self.recolorables = number_of_recolorables
+
+    # Sets the number of recolorable materials
+    def set_cast_shadows(self, cast_shadows):
+        self.cast_shadows = cast_shadows
 
     # Sets the base palette to use
     def set_palette(self, palette):

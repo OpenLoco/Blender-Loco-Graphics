@@ -42,6 +42,8 @@ class Frame:
         self.anti_alias_with_background = False
         self.maintain_aliased_silhouette = True
 
+        self.cast_shadows = True
+
         self.offset_x = 0
         self.offset_y = 0
 
@@ -150,3 +152,6 @@ class Frame:
     
     def set_target_object(self, object):
         self.target_object = object
+
+    def set_cast_shadows(self, cast_shadows):
+        self.cast_shadows = cast_shadows

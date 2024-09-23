@@ -130,3 +130,6 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         if vehicle_properties.braking_lights and vehicle_properties.roll_angle != 0:
             row.label("WARNING CANNOT HAVE BOTH BRAKING LIGHTS AND ROLL ANGLE SET") 
             row = layout.row()
+
+        row.prop(vehicle_properties, "is_airplane")
+        row = layout.row()
