@@ -8,8 +8,9 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
 import bpy
-import math
+#import math
 import os
+from mathutils import Vector
 
 from .operators.init_operator import Init
 
@@ -237,22 +238,104 @@ class GraphicsHelperPanel(bpy.types.Panel):
             num_sprites = num_sprites + int(props.flat_viewing_angles) * multiplier / 2
         return int(num_sprites)
 
+    @staticmethod
+    def get_min_max_x_bound_box_corners(object):
+        bbox_corners = [object.matrix_world * Vector(corner) for corner in object.bound_box]
+        min_x = min([x[0] for x in bbox_corners])
+        max_x = max([x[0] for x in bbox_corners])
+        return (min_x, max_x)
+
+    @staticmethod
+    def get_longest_component_edge(front, back, body):
+        mins = []
+        maxs = []
+        if not front is None:
+            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(front)
+            mins.append(min_x)
+            maxs.append(max_x)
+
+        if not back is None:
+            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(back)
+            mins.append(min_x)
+            maxs.append(max_x)
+        
+        body_min_x, body_max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(body)
+        mins.append(body_min_x)
+        maxs.append(body_max_x)
+
+        min_x = body.location[0] - min(mins)
+        max_x = max(maxs) - body.location[0]
+        return max(min_x, max_x)
+
+    @staticmethod
+    def get_bogie_position_from_component(bogie, body, half_width):
+        body_x = body.location[0]
+        bogie_x = bogie.location[0]
+        position_from_centre = max(body_x, bogie_x) - min(body_x, bogie_x)
+        return half_width - position_from_centre
+
+    @staticmethod 
+    def get_car_components(bogies, bodies):
+        components = []
+        for body in bodies:
+            component_bogies = [x for x in bogies if x.loco_graphics_helper_vehicle_properties.bogie_parent_index == body.loco_graphics_helper_vehicle_properties.index]
+            if len(component_bogies) != 2:
+                components.append((None, None, body))
+                continue
+            
+            front_bogie = component_bogies[0] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[1]
+            back_bogie = component_bogies[1] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[0]
+
+            components.append((front_bogie, back_bogie, body))
+        return components
+
+    @staticmethod
+    def blender_to_loco_dist(dist):
+        return int(dist * 32 + 0.5)
+
     def draw_vehicle_panel(self, scene, layout):
         general_properties = scene.loco_graphics_helper_general_properties
-        cars = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
-        cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY"]
+        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
         bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
 
         total_number_of_sprites = 0
 
-        if len(cars) > 0:
+        components = self.get_car_components(bogies, bodies)
+        if len(components) > 0:     
             row = layout.row()
             row.label("Car(s) details:")
-            for idx, car in enumerate(cars):
+
+            for component in components:
+                front, back, body = component
+                idx = body.loco_graphics_helper_vehicle_properties.index
+                half_width = self.get_longest_component_edge(front, back, body)
+
+                front_position = 0
+                back_position = 0
+                front_idx = 255
+                back_idx = 255
+
+                if not front is None:
+                    front_position = self.get_bogie_position_from_component(front, body, half_width)
+                    back_position = self.get_bogie_position_from_component(back, body, half_width)
+
+                    front_idx = front.loco_graphics_helper_vehicle_properties.index - 1
+                    back_idx = back.loco_graphics_helper_vehicle_properties.index - 1
+                
                 row = layout.row()
-                number_of_sprites = self.get_number_of_sprites(car)
-                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, car.name, number_of_sprites))
+                row.label(" {}. {}, Half-Width: {}, Front Position: {}, Back Position: {}".format(idx, body.name, self.blender_to_loco_dist(half_width), self.blender_to_loco_dist(front_position), self.blender_to_loco_dist(back_position)))
+                row = layout.row()
+                row.label("    Body Sprite Index: {}, Front Bogie Sprite Index: {}, Back Bogie Sprite Index: {},".format(idx - 1, front_idx, back_idx))
+
+        if len(bodies) > 0:
+            row = layout.row()
+            row.label("Body(s) details:")
+            for idx, body in enumerate(bodies):
+                row = layout.row()
+                number_of_sprites = self.get_number_of_sprites(body)
+                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, body.name, number_of_sprites))
                 total_number_of_sprites = total_number_of_sprites + number_of_sprites
 
         if len(bogies) > 0:
@@ -260,16 +343,18 @@ class GraphicsHelperPanel(bpy.types.Panel):
             row.label("Bogie(s) details:")
             for idx, bogie in enumerate(bogies):
                 row = layout.row()
-                number_of_sprites = self.get_number_of_sprites(bogie)
+                number_of_sprites = 0
+                if not bogie.loco_graphics_helper_vehicle_properties.is_clone_bogie:
+                    number_of_sprites = self.get_number_of_sprites(bogie)
+                    total_number_of_sprites = total_number_of_sprites + number_of_sprites
                 row.label(" {}. {}, Number of sprites: {}".format(idx + 1, bogie.name, number_of_sprites))
-                total_number_of_sprites = total_number_of_sprites + number_of_sprites
 
         row = layout.row()
         row.label("Total number of sprites: {}".format(total_number_of_sprites))
 
         if total_number_of_sprites == 0:
             row = layout.row()
-            row.label("NO CARS OR BOGIES SET!")
+            row.label("NO BODIES OR BOGIES SET!")
             row = layout.row()
             row.label("NOTHING WILL BE RENDERED!")
 

@@ -36,18 +36,18 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        cars = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
-        cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
-        for car_object in cars:
-            self.add_render_angles(car_object)
+        bodies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY"]
+        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        for body_object in bodies:
+            self.add_render_angles(body_object)
 
-        if cars[0].loco_graphics_helper_vehicle_properties.is_airplane:
+        if bodies[0].loco_graphics_helper_vehicle_properties.is_airplane:
             self.task_builder.set_cast_shadows(
                 True)
             self.task_builder.set_palette(self.palette_manager.get_shadow_palette())
-            self.add_airplane_shadow_render_angles(cars[0])
+            self.add_airplane_shadow_render_angles(bodies[0])
         else:
-            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone_bogie]
             bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
             for bogie_object in bogies:
                 self.add_render_angles(bogie_object)
@@ -72,10 +72,10 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                 return True
         return False
 
-    def add_render_angles(self, car_object):
-        props = car_object.loco_graphics_helper_vehicle_properties
-        is_bogie = car_object.loco_graphics_helper_object_properties.object_type == "BOGIE"
-        target_object = car_object
+    def add_render_angles(self, object):
+        props = object.loco_graphics_helper_vehicle_properties
+        is_bogie = object.loco_graphics_helper_object_properties.object_type == "BOGIE"
+        target_object = object
         animation_frames = props.number_of_animation_frames
         roll_frames = 1 if props.roll_angle == 0 else 3
         
@@ -115,7 +115,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                         # to the rig (could use anything though that can't render)
                         target_object = bpy.data.objects['Rig']
                     else:
-                        target_object = car_object
+                        target_object = object
 
                     for i in range(num_viewing_angles):
                         if roll_frames != 1:
@@ -140,8 +140,8 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                                     frame_index, num_viewing_angles, i, 0, rotation_range, target_object)
                                 self.task_builder.set_layer("Editor")
 
-    def add_airplane_shadow_render_angles(self, car_object):
-        props = car_object.loco_graphics_helper_vehicle_properties
+    def add_airplane_shadow_render_angles(self, object):
+        props = object.loco_graphics_helper_vehicle_properties
         
         track_sections = track_angle_sections["VEHICLE_SPRITE_FLAG_FLAT"]
         for track_section in track_sections:
@@ -165,5 +165,5 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                 self.task_builder.set_layer("Top Down Shadow")
                 frame_index = start_output_index + i
                 self.task_builder.add_frame(
-                    frame_index, num_viewing_angles, i, 0, rotation_range, car_object)
+                    frame_index, num_viewing_angles, i, 0, rotation_range, object)
                 self.task_builder.set_layer("Editor")

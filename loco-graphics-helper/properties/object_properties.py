@@ -21,8 +21,8 @@ def object_type_update_func(self, context):
         props.braking_lights = False
         props.is_airplane = False
 
-    # Reset to default for cars
-    if object.loco_graphics_helper_object_properties.object_type == "CAR":
+    # Reset to default for bodies
+    if object.loco_graphics_helper_object_properties.object_type == "BODY":
         props = object.loco_graphics_helper_vehicle_properties
         props.flat_viewing_angles = "64"
         props.sloped_viewing_angles = "32"
@@ -33,7 +33,7 @@ class ObjectProperties(bpy.types.PropertyGroup):
         name="Object Type",
         items=(
             ("NONE", "None", "", 0),
-            ("CAR", "Car", "", 1),
+            ("BODY", "Body", "", 1),
             ("BOGIE", "Bogie", "", 2),
             ("CARGO", "Cargo", "", 3),
         ),

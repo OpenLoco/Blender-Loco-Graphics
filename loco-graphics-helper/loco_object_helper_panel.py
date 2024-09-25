@@ -26,8 +26,8 @@ class LocoObjectHelperPanel(bpy.types.Panel):
             return
         row.prop(object_properties, "object_type")
 
-        if object_properties.object_type == "CAR":
-            self.draw_car_panel(context, layout)
+        if object_properties.object_type == "BODY":
+            self.draw_body_panel(context, layout)
         
         if object_properties.object_type == "BOGIE":
             self.draw_bogie_panel(context, layout)
@@ -42,6 +42,14 @@ class LocoObjectHelperPanel(bpy.types.Panel):
             return
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
+
+        row.prop(vehicle_properties, "is_clone_bogie")
+        row = layout.row()
+
+        if vehicle_properties.is_clone_bogie:
+            row.prop(vehicle_properties, "index",text="Clone of bogie index:")
+            row = layout.row()
+            return
 
         box = layout.box()
 
@@ -67,13 +75,16 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "index")
         row = layout.row()
 
+        row.prop(vehicle_properties, "bogie_parent_index")
+        row = layout.row()
+
         row.prop(vehicle_properties, "number_of_animation_frames")
         row = layout.row()
 
         row.prop(vehicle_properties, "rotational_symmetry")
         row = layout.row()
 
-    def draw_car_panel(self, context, layout):
+    def draw_body_panel(self, context, layout):
         scene = context.scene
         general_properties = scene.loco_graphics_helper_general_properties
         row = layout.row()

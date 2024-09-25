@@ -87,8 +87,8 @@ class VehicleProperties(bpy.types.PropertyGroup):
         min=0) 
 
     index = bpy.props.IntProperty(
-        name="Car/Bogie Index",
-        description="Controls the order of the cars/bogies",
+        name="Body/Bogie Index",
+        description="Controls the order of the bodies/bogies",
         default=1,
         min=1)
 
@@ -115,6 +115,18 @@ class VehicleProperties(bpy.types.PropertyGroup):
         description="If airplane will render airplane shadows (bogie)",
         default=False
     )
+
+    is_clone_bogie = bpy.props.BoolProperty(
+        name="Is a clone of another bogie",
+        description="If a bogie clone will not be rendered and here just for show/location data",
+        default=False
+    )
+
+    bogie_parent_index = bpy.props.IntProperty(
+        name="Parent Body Index",
+        description="Set to the parent body index",
+        default=1,
+        min=1)
 
 
 def register_vehicles_properties():
