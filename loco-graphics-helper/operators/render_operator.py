@@ -56,7 +56,7 @@ class RCTRender(object):
             (1920 / context.scene.render.resolution_x)
 
         bpy.data.cameras["Camera"].shift_x = -0.000345 * \
-            96 / context.scene.render.resolution_x
+            128 / context.scene.render.resolution_x
 
         def finish():
             general_props.rendering = False

@@ -26,8 +26,8 @@ class Init(bpy.types.Operator):
 
     def execute(self, context):
         # Setup render settings
-        context.scene.render.resolution_x = 96
-        context.scene.render.resolution_y = 96
+        context.scene.render.resolution_x = 128
+        context.scene.render.resolution_y = 128
         context.scene.render.resolution_percentage = 100
 
         # Output

@@ -25,7 +25,7 @@ bl_info = {
     "name": "Loco Graphics Helper",
     "description": "Render tool to replicate Locomotion graphics (based on RCT Graphics Helper)",
     "author": "Olivier Wervers & OpenLoco Team",
-    "version": (0, 1, 5),
+    "version": (0, 1, 6),
     "blender": (2, 79, 0),
     "location": "Render",
     "support": "COMMUNITY",
