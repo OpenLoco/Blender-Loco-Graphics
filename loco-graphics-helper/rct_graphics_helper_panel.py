@@ -8,7 +8,7 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
 import bpy
-#import math
+import math
 import os
 from mathutils import Vector
 
@@ -316,18 +316,25 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 back_position = 0
                 front_idx = 255
                 back_idx = 255
-
+                warning = None
                 if not front is None:
                     front_position = self.get_bogie_position_from_component(front, body, half_width)
                     back_position = self.get_bogie_position_from_component(back, body, half_width)
 
                     front_idx = front.loco_graphics_helper_vehicle_properties.index - 1
                     back_idx = back.loco_graphics_helper_vehicle_properties.index - 1
+                    mid_point_x = (front.location[0] - back.location[0]) / 2 + back.location[0]
+                    if not math.isclose(body.location[0], mid_point_x, rel_tol=1e-4):
+                        warning = "BODY LOCATION IS NOT AT MID X POINT BETWEEN BOGIES! {}".format(mid_point_x)
+
                 
                 row = layout.row()
                 row.label(" {}. {}, Half-Width: {}, Front Position: {}, Back Position: {}".format(idx, body.name, self.blender_to_loco_dist(half_width), self.blender_to_loco_dist(front_position), self.blender_to_loco_dist(back_position)))
                 row = layout.row()
                 row.label("    Body Sprite Index: {}, Front Bogie Sprite Index: {}, Back Bogie Sprite Index: {},".format(idx - 1, front_idx, back_idx))
+                if not warning is None:
+                    row = layout.row()
+                    row.label("    WARNING: {},".format(warning))
 
         if len(bodies) > 0:
             row = layout.row()

@@ -49,6 +49,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         if vehicle_properties.is_clone_bogie:
             row.prop(vehicle_properties, "index",text="Clone of bogie index:")
             row = layout.row()
+            
+            row.prop(vehicle_properties, "bogie_parent_index")
+            row = layout.row()
             return
 
         box = layout.box()
