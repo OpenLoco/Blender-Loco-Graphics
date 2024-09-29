@@ -326,7 +326,8 @@ class GraphicsHelperPanel(bpy.types.Panel):
                     mid_point_x = (front.location[0] - back.location[0]) / 2 + back.location[0]
                     if not math.isclose(body.location[0], mid_point_x, rel_tol=1e-4):
                         warning = "BODY LOCATION IS NOT AT MID X POINT BETWEEN BOGIES! {}".format(mid_point_x)
-
+                elif body.loco_graphics_helper_vehicle_properties.is_airplane:
+                    front_idx = 0
                 
                 row = layout.row()
                 row.label(" {}. {}, Half-Width: {}, Front Position: {}, Back Position: {}".format(idx, body.name, self.blender_to_loco_dist(half_width), self.blender_to_loco_dist(front_position), self.blender_to_loco_dist(back_position)))

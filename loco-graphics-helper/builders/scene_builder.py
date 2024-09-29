@@ -200,6 +200,7 @@ class SceneBuilder:
 
         lamp_object.hide = True
         lamp_object.hide_select = True
+        lamp_object.hide_render = True
         lamp_object.location = (0, 0, 0)
         lamp_object.rotation_euler = (math.radians(0), 0, math.radians(90))
 
