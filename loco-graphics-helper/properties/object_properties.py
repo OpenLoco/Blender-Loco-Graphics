@@ -36,6 +36,7 @@ class ObjectProperties(bpy.types.PropertyGroup):
             ("BODY", "Body", "", 1),
             ("BOGIE", "Bogie", "", 2),
             ("CARGO", "Cargo", "", 3),
+            ("CAR", "Car", "", 4),
         ),
         default="NONE",
         update=object_type_update_func

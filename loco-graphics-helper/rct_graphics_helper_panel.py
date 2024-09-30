@@ -239,6 +239,25 @@ class GraphicsHelperPanel(bpy.types.Panel):
         return int(num_sprites)
 
     @staticmethod
+    def get_min_max_x_bound_box_corners_with_children(object):
+        mins = []
+        maxs = []
+        min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(object)
+        # This can happen if there are no dimensions to this object (or if its 0 width)
+        if min_x != max_x:
+            mins.append(min_x)
+            maxs.append(max_x)
+
+        for c in object.children:
+            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(c)
+            if min_x != max_x:
+                mins.append(min_x)
+                maxs.append(max_x)
+        if len(mins) == 0 or len(maxs) == 0:
+            return (0, 0)
+        return (min(mins), max(maxs))
+
+    @staticmethod
     def get_min_max_x_bound_box_corners(object):
         bbox_corners = [object.matrix_world * Vector(corner) for corner in object.bound_box]
         min_x = min([x[0] for x in bbox_corners])
@@ -250,19 +269,20 @@ class GraphicsHelperPanel(bpy.types.Panel):
         mins = []
         maxs = []
         if not front is None:
-            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(front)
-            mins.append(min_x)
-            maxs.append(max_x)
+            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(front)
+            if min_x != max_x:
+                mins.append(min_x)
+                maxs.append(max_x)
 
         if not back is None:
-            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(back)
-            mins.append(min_x)
-            maxs.append(max_x)
+            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(back)
+            if min_x != max_x:
+                mins.append(min_x)
+                maxs.append(max_x)
         
-        body_min_x, body_max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(body)
+        body_min_x, body_max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(body)
         mins.append(body_min_x)
         maxs.append(body_max_x)
-
         min_x = body.location[0] - min(mins)
         max_x = max(maxs) - body.location[0]
         return max(min_x, max_x)
@@ -275,18 +295,24 @@ class GraphicsHelperPanel(bpy.types.Panel):
         return half_width - position_from_centre
 
     @staticmethod 
-    def get_car_components(bogies, bodies):
+    def get_car_components(cars):
         components = []
-        for body in bodies:
-            component_bogies = [x for x in bogies if x.loco_graphics_helper_vehicle_properties.bogie_parent_index == body.loco_graphics_helper_vehicle_properties.index]
+        for car in cars:
+            component_bogies = [x for x in car.children if x.loco_graphics_helper_object_properties.object_type == 'BOGIE']
+            component_bodies = [x for x in car.children if x.loco_graphics_helper_object_properties.object_type == 'BODY']
+
+            if len(component_bodies) != 1:
+                print("Malformed car {}".format(car.name))
+                continue
+
             if len(component_bogies) != 2:
-                components.append((None, None, body))
+                components.append((None, None, component_bodies[0]))
                 continue
             
             front_bogie = component_bogies[0] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[1]
             back_bogie = component_bogies[1] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[0]
 
-            components.append((front_bogie, back_bogie, body))
+            components.append((front_bogie, back_bogie, component_bodies[0]))
         return components
 
     @staticmethod
@@ -295,14 +321,13 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
     def draw_vehicle_panel(self, scene, layout):
         general_properties = scene.loco_graphics_helper_general_properties
-        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY"]
-        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
-        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
-        bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        
+        cars = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
+        cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
 
         total_number_of_sprites = 0
 
-        components = self.get_car_components(bogies, bodies)
+        components = self.get_car_components(cars)
         if len(components) > 0:     
             row = layout.row()
             row.label("Car(s) details:")
@@ -310,6 +335,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
             for component in components:
                 front, back, body = component
                 idx = body.loco_graphics_helper_vehicle_properties.index
+                print("Car {}".format(idx))
                 half_width = self.get_longest_component_edge(front, back, body)
 
                 front_position = 0
@@ -336,6 +362,11 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 if not warning is None:
                     row = layout.row()
                     row.label("    WARNING: {},".format(warning))
+
+        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY"]
+        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+        bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
 
         if len(bodies) > 0:
             row = layout.row()

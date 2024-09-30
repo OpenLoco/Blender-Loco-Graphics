@@ -122,12 +122,6 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default=False
     )
 
-    bogie_parent_index = bpy.props.IntProperty(
-        name="Parent Body Index",
-        description="Set to the parent body index",
-        default=1,
-        min=1)
-
 
 def register_vehicles_properties():
     bpy.types.Object.loco_graphics_helper_vehicle_properties = bpy.props.PointerProperty(
