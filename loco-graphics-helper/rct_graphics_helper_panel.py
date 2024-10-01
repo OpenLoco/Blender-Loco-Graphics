@@ -24,6 +24,8 @@ from .operators.render_tiles_operator import RenderTiles
 
 from .models.palette import palette_colors, palette_colors_details
 
+from .vehicle import get_car_components, VehicleComponent, SubComponent
+
 class RepairConfirmOperator(bpy.types.Operator):
     """This action will clear out the default camera and light. Changes made to the rig object, compositor nodes and recolorable materials will be lost."""
     bl_idname = "loco_graphics_helper.repair_confirm"
@@ -212,108 +214,6 @@ class GraphicsHelperPanel(bpy.types.Panel):
         #    if general_properties.rendering:
         #        text = "Failed"
         #    row.operator("render.loco_track", text=text)
-    @staticmethod
-    def get_number_of_sprites(object):
-        is_bogie = object.loco_graphics_helper_object_properties.object_type == "BOGIE"
-        props = object.loco_graphics_helper_vehicle_properties
-
-        multiplier = props.number_of_animation_frames
-        if props.roll_angle != 0:
-            multiplier = 3
-        elif props.braking_lights:
-            multiplier = multiplier + 1
-        if props.rotational_symmetry:
-            multiplier = multiplier / 2
-
-        num_transition_sprites = 0 if is_bogie else 4 + 4
-        num_sprites = 0
-        if props.sprite_track_flags[0]:
-            num_sprites = int(props.flat_viewing_angles) * multiplier
-        if props.sprite_track_flags[1]:
-            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + num_transition_sprites) * multiplier
-        if props.sprite_track_flags[2]:
-            num_sprites = num_sprites + (int(props.sloped_viewing_angles) * 2 + num_transition_sprites) * multiplier
-        
-        if props.is_airplane:
-            num_sprites = num_sprites + int(props.flat_viewing_angles) * multiplier / 2
-        return int(num_sprites)
-
-    @staticmethod
-    def get_min_max_x_bound_box_corners_with_children(object):
-        mins = []
-        maxs = []
-        min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners(object)
-        # This can happen if there are no dimensions to this object (or if its 0 width)
-        if min_x != max_x:
-            mins.append(min_x)
-            maxs.append(max_x)
-
-        for c in object.children:
-            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(c)
-            if min_x != max_x:
-                mins.append(min_x)
-                maxs.append(max_x)
-        if len(mins) == 0 or len(maxs) == 0:
-            return (0, 0)
-        return (min(mins), max(maxs))
-
-    @staticmethod
-    def get_min_max_x_bound_box_corners(object):
-        bbox_corners = [object.matrix_world * Vector(corner) for corner in object.bound_box]
-        min_x = min([x[0] for x in bbox_corners])
-        max_x = max([x[0] for x in bbox_corners])
-        return (min_x, max_x)
-
-    @staticmethod
-    def get_longest_component_edge(front, back, body):
-        mins = []
-        maxs = []
-        if not front is None:
-            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(front)
-            if min_x != max_x:
-                mins.append(min_x)
-                maxs.append(max_x)
-
-        if not back is None:
-            min_x, max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(back)
-            if min_x != max_x:
-                mins.append(min_x)
-                maxs.append(max_x)
-        
-        body_min_x, body_max_x = GraphicsHelperPanel.get_min_max_x_bound_box_corners_with_children(body)
-        mins.append(body_min_x)
-        maxs.append(body_max_x)
-        min_x = body.location[0] - min(mins)
-        max_x = max(maxs) - body.location[0]
-        return max(min_x, max_x)
-
-    @staticmethod
-    def get_bogie_position_from_component(bogie, body, half_width):
-        body_x = body.location[0]
-        bogie_x = bogie.location[0]
-        position_from_centre = max(body_x, bogie_x) - min(body_x, bogie_x)
-        return half_width - position_from_centre
-
-    @staticmethod 
-    def get_car_components(cars):
-        components = []
-        for car in cars:
-            component_bogies = [x for x in car.children if x.loco_graphics_helper_object_properties.object_type == 'BOGIE']
-            component_bodies = [x for x in car.children if x.loco_graphics_helper_object_properties.object_type == 'BODY']
-
-            if len(component_bodies) != 1:
-                print("Malformed car {}".format(car.name))
-                continue
-
-            if len(component_bogies) != 2:
-                components.append((None, None, component_bodies[0]))
-                continue
-            
-            front_bogie = component_bogies[0] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[1]
-            back_bogie = component_bogies[1] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[0]
-
-            components.append((front_bogie, back_bogie, component_bodies[0]))
-        return components
 
     @staticmethod
     def blender_to_loco_dist(dist):
@@ -327,67 +227,122 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
         total_number_of_sprites = 0
 
-        components = self.get_car_components(cars)
-        if len(components) > 0:     
-            row = layout.row()
-            row.label("Car(s) details:")
+        components = get_car_components(cars)
+        if len(components) == 0:
+            return   
+        row = layout.row()
+        row.label("Car(s) details:")
 
-            for component in components:
-                front, back, body = component
-                idx = body.loco_graphics_helper_vehicle_properties.index
-                print("Car {}".format(idx))
-                half_width = self.get_longest_component_edge(front, back, body)
+        for component in components:
+            front = component.get_object(SubComponent.FRONT)
+            back = component.get_object(SubComponent.BACK)
+            body = component.get_object(SubComponent.BODY)
+            idx = body.loco_graphics_helper_vehicle_properties.index
 
-                front_position = 0
-                back_position = 0
-                front_idx = 255
-                back_idx = 255
-                warning = None
-                if not front is None:
-                    front_position = self.get_bogie_position_from_component(front, body, half_width)
-                    back_position = self.get_bogie_position_from_component(back, body, half_width)
+            front_position = 0
+            back_position = 0
+            body_idx = idx - 1 + 180 if body.loco_graphics_helper_vehicle_properties.is_inverted else idx - 1
+            front_idx = 255
+            back_idx = 255
+            warning = None
+            anim_location = 0
+            front_name = '' if front is None else front.name
+            back_name = '' if back is None else back.name
+            if not front is None:
+                front_position = component.get_bogie_position(SubComponent.FRONT)
+                back_position = component.get_bogie_position(SubComponent.BACK)
 
+                if component.get_number_of_sprites(SubComponent.FRONT) != 0:
                     front_idx = front.loco_graphics_helper_vehicle_properties.index - 1
+                    front_idx = front_idx + 180 if front.loco_graphics_helper_vehicle_properties.is_inverted else front_idx
+
+                if component.get_number_of_sprites(SubComponent.BACK) != 0:
                     back_idx = back.loco_graphics_helper_vehicle_properties.index - 1
-                    mid_point_x = (front.location[0] - back.location[0]) / 2 + back.location[0]
-                    if not math.isclose(body.location[0], mid_point_x, rel_tol=1e-4):
-                        warning = "BODY LOCATION IS NOT AT MID X POINT BETWEEN BOGIES! {}".format(mid_point_x)
-                elif body.loco_graphics_helper_vehicle_properties.is_airplane:
-                    front_idx = 0
-                
-                row = layout.row()
-                row.label(" {}. {}, Half-Width: {}, Front Position: {}, Back Position: {}".format(idx, body.name, self.blender_to_loco_dist(half_width), self.blender_to_loco_dist(front_position), self.blender_to_loco_dist(back_position)))
-                row = layout.row()
-                row.label("    Body Sprite Index: {}, Front Bogie Sprite Index: {}, Back Bogie Sprite Index: {},".format(idx - 1, front_idx, back_idx))
-                if not warning is None:
-                    row = layout.row()
-                    row.label("    WARNING: {},".format(warning))
+                    back_idx = back_idx + 180 if front.loco_graphics_helper_vehicle_properties.is_inverted else back_idx
+                mid_point_x = (front.location[0] - back.location[0]) / 2 + back.location[0]
+                if not math.isclose(body.location[0], mid_point_x, rel_tol=1e-4):
+                    warning = "BODY LOCATION IS NOT AT MID X POINT BETWEEN BOGIES! {}".format(mid_point_x)
+                anim_location = component.get_animation_location()
+                if anim_location > 255 or anim_location < 0:
+                    warning = "Animation is too far from bogies"
+                    anim_location = 255
+            elif body.loco_graphics_helper_vehicle_properties.is_airplane:
+                front_idx = 0
+            
+            row = layout.row()
+            row.label("{}. {}, {}, {}, {}".format(component.car.loco_graphics_helper_vehicle_properties.index - 1, component.car.name, body.name, front_name, back_name))
+            row = layout.row()
+            row.label("  Front Position: {}".format(self.blender_to_loco_dist(front_position)))
+            row = layout.row()
+            row.label("  Back Position: {}".format(self.blender_to_loco_dist(back_position)))
+            row = layout.row()
+            row.label("  Front Bogie Sprite Index: {}".format(front_idx))
+            row = layout.row()
+            row.label("  Back Bogie Sprite Index: {}".format(back_idx))
+            row = layout.row()
+            row.label("  Body Sprite Index: {}".format(body_idx))
+            row = layout.row()
+            row.label("  Animation Position: {}".format(anim_location))
 
-        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY"]
-        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
-        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE"]
+            if not warning is None:
+                row = layout.row()
+                row.label("    WARNING: {},".format(warning))
+
+        row = layout.row()
+        row.label("Body(s) details:")
+        components = sorted(components, key=lambda x: x.body.loco_graphics_helper_vehicle_properties.index)
+        for component in components:
+            body = component.body
+            if body is None:
+                continue
+            if body.loco_graphics_helper_vehicle_properties.is_clone:
+                continue
+            number_of_sprites = component.get_number_of_sprites(SubComponent.BODY)
+            total_number_of_sprites = total_number_of_sprites + number_of_sprites
+
+            if number_of_sprites == 0:
+                continue
+
+            half_width = component.get_half_width()
+            row = layout.row()
+            row.label("{}. {}".format(body.loco_graphics_helper_vehicle_properties.index, body.name))
+            row = layout.row()
+            row.label("  Half-Width: {}".format(self.blender_to_loco_dist(half_width)))
+            row = layout.row()
+            row.label("  Number of sprites: {}".format(number_of_sprites))
+
+        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
         bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        
+        row = layout.row()
+        row.label("Bogie(s) details:")
+        for bogie in bogies:
+            car = None
+            sub_component = None
+            for component in components:
+                if component.front == bogie:
+                    car = component
+                    sub_component = SubComponent.FRONT
+                    break
+                if component.back == bogie:
+                    car = component
+                    sub_component = SubComponent.BACK
+                    break
+            if car is None:
+                continue
+            
+            number_of_sprites = car.get_number_of_sprites(sub_component)
+            total_number_of_sprites = total_number_of_sprites + number_of_sprites
 
-        if len(bodies) > 0:
+            if number_of_sprites == 0:
+                continue
+
+            half_width = component.get_half_width()
             row = layout.row()
-            row.label("Body(s) details:")
-            for idx, body in enumerate(bodies):
-                row = layout.row()
-                number_of_sprites = self.get_number_of_sprites(body)
-                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, body.name, number_of_sprites))
-                total_number_of_sprites = total_number_of_sprites + number_of_sprites
-
-        if len(bogies) > 0:
+            row.label("{}. {}".format(bogie.loco_graphics_helper_vehicle_properties.index, bogie.name))
             row = layout.row()
-            row.label("Bogie(s) details:")
-            for idx, bogie in enumerate(bogies):
-                row = layout.row()
-                number_of_sprites = 0
-                if not bogie.loco_graphics_helper_vehicle_properties.is_clone_bogie:
-                    number_of_sprites = self.get_number_of_sprites(bogie)
-                    total_number_of_sprites = total_number_of_sprites + number_of_sprites
-                row.label(" {}. {}, Number of sprites: {}".format(idx + 1, bogie.name, number_of_sprites))
-
+            row.label("  Number of sprites: {}".format(number_of_sprites))
+        
         row = layout.row()
         row.label("Total number of sprites: {}".format(total_number_of_sprites))
 

@@ -37,6 +37,7 @@ class ObjectProperties(bpy.types.PropertyGroup):
             ("BOGIE", "Bogie", "", 2),
             ("CARGO", "Cargo", "", 3),
             ("CAR", "Car", "", 4),
+            ("ANIMATION", "Animation position", "", 5),
         ),
         default="NONE",
         update=object_type_update_func

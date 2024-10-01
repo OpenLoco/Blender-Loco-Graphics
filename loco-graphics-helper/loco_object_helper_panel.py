@@ -60,10 +60,13 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
-        row.prop(vehicle_properties, "is_clone_bogie")
+        row.prop(vehicle_properties, "is_clone")
         row = layout.row()
 
-        if vehicle_properties.is_clone_bogie:
+        row.prop(vehicle_properties, "is_inverted")
+        row = layout.row()
+
+        if vehicle_properties.is_clone:
             row.prop(vehicle_properties, "index",text="Clone of bogie index:")
             row = layout.row()
             return
@@ -109,6 +112,17 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "is_clone")
+        row = layout.row()
+
+        row.prop(vehicle_properties, "is_inverted")
+        row = layout.row()
+
+        if vehicle_properties.is_clone:
+            row.prop(vehicle_properties, "index",text="Clone of body index:")
+            row = layout.row()
+            return
+        
         box = layout.box()
 
         row = box.row()

@@ -116,9 +116,15 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default=False
     )
 
-    is_clone_bogie = bpy.props.BoolProperty(
-        name="Is a clone of another bogie",
-        description="If a bogie clone will not be rendered and here just for show/location data",
+    is_clone = bpy.props.BoolProperty(
+        name="Is a clone of another bogie/body",
+        description="Clones will not be rendered and here just for show/location/meta data",
+        default=False
+    )
+
+    is_inverted = bpy.props.BoolProperty(
+        name="Direction is inverted",
+        description="Useful for clones to mark an inverted clone",
         default=False
     )
 
