@@ -99,7 +99,7 @@ class Frame:
             for c in self.target_object.children:
                 c.hide_render = False
 
-            object.location = self.target_object.location
+            object.location = self.target_object.matrix_world.translation
 
         # This is a little hacky...
         if self.layer == 'Top Down Shadow':

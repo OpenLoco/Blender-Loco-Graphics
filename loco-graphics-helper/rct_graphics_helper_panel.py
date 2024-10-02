@@ -248,6 +248,10 @@ class GraphicsHelperPanel(bpy.types.Panel):
             anim_location = 0
             front_name = '' if front is None else front.name
             back_name = '' if back is None else back.name
+            mid_point_x = component.get_preferred_body_midpoint()
+            if not math.isclose(body.matrix_world.translation[0], mid_point_x, rel_tol=1e-4):
+                warning = "BODY LOCATION IS NOT AT PREFERRED MID X POINT! {}".format(mid_point_x)
+
             if not front is None:
                 front_position = component.get_bogie_position(SubComponent.FRONT)
                 back_position = component.get_bogie_position(SubComponent.BACK)
@@ -259,9 +263,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 if component.get_number_of_sprites(SubComponent.BACK) != 0:
                     back_idx = back.loco_graphics_helper_vehicle_properties.index - 1
                     back_idx = back_idx + 180 if front.loco_graphics_helper_vehicle_properties.is_inverted else back_idx
-                mid_point_x = (front.location[0] - back.location[0]) / 2 + back.location[0]
-                if not math.isclose(body.location[0], mid_point_x, rel_tol=1e-4):
-                    warning = "BODY LOCATION IS NOT AT MID X POINT BETWEEN BOGIES! {}".format(mid_point_x)
+
                 anim_location = component.get_animation_location()
                 if anim_location > 255 or anim_location < 0:
                     warning = "Animation is too far from bogies"
