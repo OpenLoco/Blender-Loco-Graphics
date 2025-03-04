@@ -13,6 +13,7 @@ import os
 
 from ..operators.render_operator import RCTRender
 from ..angle_sections.track import track_angle_sections, track_angle_sections_names
+from ..vehicle import get_number_of_sprites
 
 
 class RenderVehicle(RCTRender, bpy.types.Operator):
@@ -36,18 +37,17 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        bodies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+        bodies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone and not x.loco_graphics_helper_vehicle_properties.null_component]
         bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         for body_object in bodies:
             self.add_render_angles(body_object)
 
         if bodies[0].loco_graphics_helper_vehicle_properties.is_airplane:
-            self.task_builder.set_cast_shadows(
-                True)
+            self.task_builder.set_cast_shadows(True)
             self.task_builder.set_palette(self.palette_manager.get_shadow_palette())
             self.add_airplane_shadow_render_angles(bodies[0])
         else:
-            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone and not x.loco_graphics_helper_vehicle_properties.null_component]
             bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
             for bogie_object in bogies:
                 self.add_render_angles(bogie_object)
@@ -74,10 +74,13 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
     def add_render_angles(self, object):
         props = object.loco_graphics_helper_vehicle_properties
+        if not props.render_sprite:
+            self.task_builder.add_null_frames(get_number_of_sprites(object))
+            return
         is_bogie = object.loco_graphics_helper_object_properties.object_type == "BOGIE"
         target_object = object
         animation_frames = props.number_of_animation_frames
-        roll_frames = 1 if props.roll_angle == 0 else 3
+        tilt_frames = 1 if props.tilt_angle == 0 else 3
         
         for i in range(len(track_angle_sections_names)):
             key = track_angle_sections_names[i]
@@ -118,12 +121,12 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
                         target_object = object
 
                     for i in range(num_viewing_angles):
-                        if roll_frames != 1:
-                            roll_angles = [0, props.roll_angle, -props.roll_angle]
-                            for j, roll_angle in enumerate(roll_angles):
-                                frame_index = start_output_index + i * roll_frames + j
+                        if tilt_frames != 1:
+                            tilt_angles = [0, props.tilt_angle, -props.tilt_angle]
+                            for j, tilt_angle in enumerate(tilt_angles):
+                                frame_index = start_output_index + i * tilt_frames + j
                                 self.task_builder.set_rotation(
-                                    base_view_angle, roll_angle, vertical_angle=track_section[2])
+                                    base_view_angle, tilt_angle, vertical_angle=track_section[2])
                                 self.task_builder.add_frame(
                                     frame_index, num_viewing_angles, i, j, rotation_range, target_object)
                         else:

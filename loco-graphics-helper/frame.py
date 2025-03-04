@@ -14,6 +14,14 @@ import os
 # Representation of a frame that is to be rendered
 
 
+def recursive_hide_children(object, hide, type = 'NONE'):
+    object.hide_render = hide
+    for child in object.children:
+        if child.loco_graphics_helper_object_properties.object_type != 'NONE':
+            if type != 'NONE':
+                continue
+        recursive_hide_children(child, hide)
+
 class Frame:
     def __init__(self, frame_index, task, view_angle, bank_angle=0, vertical_angle=0, mid_angle=0):
         self.frame_index = frame_index
@@ -91,15 +99,13 @@ class Frame:
                     continue
                 if o.loco_graphics_helper_object_properties.object_type == 'NONE':
                     continue
-                o.hide_render = True
-                for c in o.children:
-                    c.hide_render = True
+                recursive_hide_children(o,True)
 
-            self.target_object.hide_render = False
-            for c in self.target_object.children:
-                c.hide_render = False
+            recursive_hide_children(self.target_object,False, self.target_object.loco_graphics_helper_object_properties.object_type)
 
             object.location = self.target_object.matrix_world.translation
+            if self.target_object.loco_graphics_helper_vehicle_properties.bounding_box_override:
+                object.location = self.target_object.loco_graphics_helper_vehicle_properties.bounding_box_override.matrix_world.translation
 
         # This is a little hacky...
         if self.layer == 'Top Down Shadow':
@@ -124,6 +130,9 @@ class Frame:
 
     def set_offset(self, offset_x, offset_y):
         self.offset_x = offset_x
+        self.offset_y = offset_y
+
+    def set_offset_y(self, offset_y):
         self.offset_y = offset_y
 
     def set_multi_tile_size(self, width, length, invert_tile_positions):

@@ -60,6 +60,15 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "null_component")
+        row = layout.row()
+
+        if vehicle_properties.null_component:
+            return
+
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
         row.prop(vehicle_properties, "is_clone")
         row = layout.row()
 
@@ -67,14 +76,15 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if vehicle_properties.is_clone:
-            row.prop(vehicle_properties, "index",text="Clone of bogie index:")
-            row = layout.row()
             return
+
+        row.prop(vehicle_properties, "render_sprite")
+        row = layout.row()
 
         box = layout.box()
 
         row = box.row()
-        row.label("Track Properties:")
+        row.label("Sprite:")
 
         split = box.split(.50)
         columns = [split.column(), split.column()]
@@ -92,14 +102,13 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.label("Sloped Viewing Angles: 32")
         row = layout.row()
 
-        row.prop(vehicle_properties, "index")
-        row = layout.row()
-
         row.prop(vehicle_properties, "number_of_animation_frames")
         row = layout.row()
 
         row.prop(vehicle_properties, "rotational_symmetry")
         row = layout.row()
+
+        row.prop(vehicle_properties, "bounding_box_override")
 
     def draw_body_panel(self, context, layout):
         scene = context.scene
@@ -112,6 +121,15 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "null_component")
+        row = layout.row()
+
+        if vehicle_properties.null_component:
+            return
+
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
         row.prop(vehicle_properties, "is_clone")
         row = layout.row()
 
@@ -119,14 +137,15 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if vehicle_properties.is_clone:
-            row.prop(vehicle_properties, "index",text="Clone of body index:")
-            row = layout.row()
             return
-        
+
+        row.prop(vehicle_properties, "render_sprite")
+        row = layout.row()
+
         box = layout.box()
 
         row = box.row()
-        row.label("Track Properties:")
+        row.label("Sprites:")
 
         split = box.split(.50)
         columns = [split.column(), split.column()]
@@ -148,17 +167,14 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "sloped_viewing_angles", text="")
         row = layout.row()
 
-        row.prop(vehicle_properties, "roll_angle")
-        row = layout.row()
-
-        row.prop(vehicle_properties, "index")
+        row.prop(vehicle_properties, "tilt_angle")
         row = layout.row()
 
         row.prop(vehicle_properties, "number_of_animation_frames")
         row = layout.row()
 
-        if vehicle_properties.number_of_animation_frames != 1 and vehicle_properties.roll_angle != 0:
-            row.label("WARNING CANNOT HAVE BOTH ANIMATION FRAMES AND ROLL ANGLE SET")
+        if vehicle_properties.number_of_animation_frames != 1 and vehicle_properties.tilt_angle != 0:
+            row.label("WARNING: cannot have tilt frames and animation frames")
             row = layout.row()
 
         row.prop(vehicle_properties, "rotational_symmetry")
@@ -167,8 +183,10 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "braking_lights")
         row = layout.row()
         if vehicle_properties.braking_lights and vehicle_properties.roll_angle != 0:
-            row.label("WARNING CANNOT HAVE BOTH BRAKING LIGHTS AND ROLL ANGLE SET") 
+            row.label("WARNING: cannot have brake lights and tilt frames") 
             row = layout.row()
 
         row.prop(vehicle_properties, "is_airplane")
         row = layout.row()
+
+        row.prop(vehicle_properties, "bounding_box_override")
