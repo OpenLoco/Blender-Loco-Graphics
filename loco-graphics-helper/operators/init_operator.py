@@ -78,6 +78,13 @@ class Init(bpy.types.Operator):
         compositorBuilder = CompositorBuilder()
         compositorBuilder.build(context)
 
+        # Set project properties
+        properties = context.scene.loco_graphics_helper_general_properties
+        addon_prefs = context.user_preferences.addons["loco-graphics-helper"].preferences
+
+        properties.RCTPluginVersion = addon_prefs.RCTPluginVersion
+        properties.RCTPluginName = addon_prefs.printable_idname
+
         return {'FINISHED'}
 
     def delete_default_render_layer(self, context):

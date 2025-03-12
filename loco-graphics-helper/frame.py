@@ -14,11 +14,18 @@ import os
 # Representation of a frame that is to be rendered
 
 
+def recursive_hide_children(object, hide, type = 'NONE'):
+    object.hide_render = hide
+    for child in object.children:
+        if child.loco_graphics_helper_object_properties.object_type != 'NONE':
+            if type != 'NONE':
+                continue
+        recursive_hide_children(child, hide)
+
 class Frame:
     def __init__(self, frame_index, task, view_angle, bank_angle=0, vertical_angle=0, mid_angle=0):
         self.frame_index = frame_index
         self.output_indices = [frame_index]
-
         self.task = task
         self.view_angle = view_angle
         self.bank_angle = bank_angle
@@ -44,8 +51,14 @@ class Frame:
 
         self.cast_shadows = True
 
+        self.output_prefix = "Sprite"
         self.offset_x = 0
         self.offset_y = 0
+        self.output_flags = 0
+        self.output_zoomOffset = 0
+        self.scale = (1, 1, 1)
+        self.mirror_x = False
+        self.view_angle_offset = -45
 
         self.base_palette = None
 
@@ -76,41 +89,61 @@ class Frame:
             output_paths = []
             for output_index in self.output_indices:
                 output_paths.append(os.path.join(
-                    self.task.get_output_folder(), "sprites", "sprite_{}.png".format(output_index)))
+                    self.task.get_output_folder(), "sprites", "{}_{}.png".format(self.output_prefix, int(output_index))))
             return output_paths
         else:
-            return [os.path.join(self.task.get_output_folder(), "sprites", "sprite_{}.png".format(self.frame_index))]
+            return [os.path.join(self.task.get_output_folder(), "sprites", "{}_{}.png".format(self.output_prefix,self.frame_index))]
 
-    def prepare_scene(self):
-        object = bpy.data.objects['Rig']
-        if object is None:
-            return
+    def prepare_scene_vehicle(self):
+        location = None
         if not self.target_object is None:
             for o in bpy.data.scenes[0].objects:
                 if o == self.target_object:
                     continue
                 if o.loco_graphics_helper_object_properties.object_type == 'NONE':
                     continue
-                o.hide_render = True
-                for c in o.children:
-                    c.hide_render = True
+                recursive_hide_children(o,True)
+            recursive_hide_children(self.target_object,False, self.target_object.loco_graphics_helper_object_properties.object_type)
 
-            self.target_object.hide_render = False
-            for c in self.target_object.children:
-                c.hide_render = False
-
-            object.location = self.target_object.matrix_world.translation
-
+            location = self.target_object.matrix_world.translation
+            if self.target_object.loco_graphics_helper_vehicle_properties.bounding_box_override:
+                location = self.target_object.loco_graphics_helper_vehicle_properties.bounding_box_override.matrix_world.translation
         # This is a little hacky...
         if self.layer == 'Top Down Shadow':
             bpy.data.objects['AirplaneShadowLight'].hide_render = False
         else:
             bpy.data.objects['AirplaneShadowLight'].hide_render = True
+        return location
+
+    def prepare_scene_track(self):
+        for o in bpy.data.scenes[0].objects:
+            if o.loco_graphics_helper_object_properties.object_type == 'NONE':
+                continue
+            recursive_hide_children(o,True)
+        if self.target_object is not None:
+            for o in self.target_object.objects:
+                recursive_hide_children(o,False)
+            return self.target_object.location
+        return self.target_object.location
+
+    def prepare_scene(self):
+        object = bpy.data.objects['Rig']
+        general_properties = bpy.context.scene.loco_graphics_helper_general_properties
+        render_mode = general_properties.render_mode
+        if object is None:
+            return
+        
+        if render_mode == "VEHICLE":
+            object.location = self.prepare_scene_vehicle()
+        elif render_mode == "TRACK":
+            object.location = self.prepare_scene_track()
+
 
         object.rotation_euler = (math.radians(self.bank_angle),
                                  math.radians(self.vertical_angle), math.radians(self.mid_angle))
         vJoint = object.children[0]
-        vJoint.rotation_euler = (0, 0, math.radians(self.view_angle - 45))
+        vJoint.scale = self.scale
+        vJoint.rotation_euler = (0, 0, math.radians(self.view_angle + self.view_angle_offset ))
 
     def set_anti_aliasing_with_background(self, use_anti_aliasing, anti_alias_with_background, maintain_aliased_silhouette):
         self.use_anti_aliasing = use_anti_aliasing
@@ -124,6 +157,9 @@ class Frame:
 
     def set_offset(self, offset_x, offset_y):
         self.offset_x = offset_x
+        self.offset_y = offset_y
+
+    def set_offset_y(self, offset_y):
         self.offset_y = offset_y
 
     def set_multi_tile_size(self, width, length, invert_tile_positions):
@@ -155,9 +191,57 @@ class Frame:
         if len(self.output_indices) != self.width * self.length * layers:
             raise Exception(
                 "The number of output indices does not match the number of expected output sprites for this frame")
-    
+
+    def oversize_order_scenery(self, start_output_index, number_of_viewing_angles, viewing_angle_index, animation_frames, animation_frame):
+        output_indices = []
+        for k in range(self.width * self.length):
+            tile_index = k
+            if self.invert_tile_positions:
+                tile_index = (self.width * self.length - k - 1)
+            output_indices.append(
+                start_output_index + tile_index * animation_frames * number_of_viewing_angles + animation_frame * number_of_viewing_angles + viewing_angle_index)
+        self.set_output_indices(output_indices)
+        return self.width * self.length
+
+    def oversize_order_track(self, start_output_index, number_of_viewing_angles, viewing_angle_index, animation_frames, animation_frame):
+        if self.target_object is None:
+            self.set_output_indices([start_output_index + viewing_angle_index * animation_frames * self.width * self.length + x for x in range(self.width * self.length)])
+            return
+        offset_order = self.target_object.manifest.get_output_order()
+        num_sprites = len(self.target_object.manifest.subposition_order)
+        output_indices = []
+        for offset in offset_order:
+            frame_number = offset + start_output_index
+            frame_number += viewing_angle_index * num_sprites # do I bother with animation frames?
+            output_indices.append(frame_number)
+        self.set_output_indices(output_indices)
+        return num_sprites
+
     def set_target_object(self, object):
         self.target_object = object
 
     def set_cast_shadows(self, cast_shadows):
         self.cast_shadows = cast_shadows
+
+    def set_output_flags(self, flags):
+        self.output_flags = flags
+
+    def set_output_zoomOffset(self, offset):
+        if offset < 0:
+            raise Exception("Zoom Offset must be positive")
+        if offset > self.frame_index:
+            raise Exception("Zoom Offset may not be larger than the current sprite number")
+        self.output_zoomOffset = offset
+    
+    def set_mirror_x(self, mirror):
+        if mirror == self.mirror_x:
+            return
+        self.mirror_x = mirror
+        if mirror:
+            self.scale = (-1, 1, 1)
+            self.view_angle_offset = -90-45
+            self.view_angle = 360-self.view_angle
+        else:
+            self.scale = (1, 1, 1)
+            self.view_angle_offset = -45
+            self.view_angle = 360-self.view_angle

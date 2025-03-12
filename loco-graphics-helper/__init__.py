@@ -16,6 +16,8 @@ from .properties.walls_properties import register_walls_properties, unregister_w
 from .properties.general_properties import register_general_properties, unregister_general_properties
 from .properties.track_properties import register_track_properties, unregister_track_properties
 from .properties.object_properties import register_object_properties, unregister_object_properties
+from .properties.track_piece_properties import register_track_piece_properties, unregister_track_piece_properties
+from .properties.file_versioning import register_file_updater, unregister_file_updater
 from .rct_graphics_helper_panel import GraphicsHelperPanel
 from . import developer_utils
 import importlib
@@ -25,7 +27,7 @@ bl_info = {
     "name": "Loco Graphics Helper",
     "description": "Render tool to replicate Locomotion graphics (based on RCT Graphics Helper)",
     "author": "Olivier Wervers & OpenLoco Team",
-    "version": (0, 1, 6),
+    "version": (0, 2, 1),
     "blender": (2, 79, 0),
     "location": "Render",
     "support": "COMMUNITY",
@@ -54,6 +56,8 @@ def register():
     register_walls_properties()
     register_track_properties()
     register_object_properties()
+    register_track_piece_properties()
+    register_file_updater()
 
     print("Registered {} with {} modules".format(
         bl_info["name"], len(modules)))
@@ -71,5 +75,7 @@ def unregister():
     unregister_walls_properties()
     unregister_track_properties()
     unregister_object_properties()
+    unregister_track_piece_properties()
+    unregister_file_updater()
 
     print("Unregistered {}".format(bl_info["name"]))

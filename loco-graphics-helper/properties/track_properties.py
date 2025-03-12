@@ -1,25 +1,33 @@
 '''
-Copyright (c) 2022 RCT Graphics Helper developers
+Copyright (c) 2025 Loco Graphics Helper developers
 
 For a complete list of all authors, please refer to the addon's meta info.
-Interested in contributing? Visit https://github.com/oli414/Blender-RCT-Graphics
+Interested in contributing? Visit https://github.com/OpenLoco/Blender-Loco-Graphics
 
-RCT Graphics Helper is licensed under the GNU General Public License version 3.
+Loco Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
 import bpy
 import math
 import os
-
 from ..builders.task_builder import TaskBuilder
 
 from ..operators.render_operator import RCTRender
 
 class TrackProperties(bpy.types.PropertyGroup):
-    placeholder = bpy.props.BoolProperty(
-        name="Placeholder",
-        description="Test.",
-        default=False)
+    track_type = bpy.props.EnumProperty(
+        name="Track Type",
+        items=(
+            ("RAIL", "Railway", "", 0),
+            ("ROAD", "Road", "", 1),
+            ("TRAM", "Tramway", "", 2),
+        ),
+        default="RAIL"
+    )
+    one_way = bpy.props.BoolProperty(
+        name="one_way",
+        description="Models for both directions required",
+        default = False)
 
 
 def register_track_properties():

@@ -9,11 +9,19 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 
 import bpy
 from bpy.types import AddonPreferences
-
+from .file_versioning import current_file_version
 
 class RCTGraphicsHelperPreferences(AddonPreferences):
-    bl_idname = "loco-graphics-helper"
+    printable_idname = "loco-graphics-helper"
+    bl_idname = printable_idname
 
+    # make sure to add an updater to file_updater.py
+    RCTPluginVersion = bpy.props.IntProperty(
+        name="RCT Tools Version",
+        description="What version of the fork this project is for. Number updates when a backwards-incompatible change is introduced.",
+        default=current_file_version)
+
+    # currently unused
     orct2_directory = bpy.props.StringProperty(
         name="OpenRCT2 Path",
         description="The path to OpenRCT2. This should point to the directory that contains the object folder.",
@@ -21,6 +29,7 @@ class RCTGraphicsHelperPreferences(AddonPreferences):
         subtype='DIR_PATH',
         default="")
 
+    # currently unused
     opengraphics_directory = bpy.props.StringProperty(
         name="OpenGraphics Repository Path",
         description="Root directory for the OpenGraphics repository, if available.",
@@ -30,5 +39,5 @@ class RCTGraphicsHelperPreferences(AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "orct2_directory")
-        layout.prop(self, "opengraphics_directory")
+        col = layout.column()
+        col.label("""RCT Graphics Helper, "{}" Fork, file version {}""".format(self.bl_idname, self.RCTPluginVersion))

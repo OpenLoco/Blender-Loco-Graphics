@@ -30,24 +30,40 @@ class SpritesManifestProcessor(SubProcessor):
         file_path = os.path.join(
             task.get_output_folder(), "sprites.json")
 
-        output_info_list = task.output_info
+        def frame_filter(a):
+            return a.index >= 0 and a.offset_x >= -128 and a.offset_x <= 127 and a.offset_y >= -128 and a.offset_y < 127
+
+        output_info_list = [a for a in task.output_info if frame_filter(a)]
 
         def get_index(output_info):
             return output_info.index
 
         output_info_list.sort(key=get_index)
+        
+        images = []
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, "r") as images_file:
+                    images = json.loads(images_file.read(),
+                                        object_pairs_hook=OrderedDict)
+                    images_file.close()
+            except Exception as e:
+                print("Error when reading sprites.json",e)
 
         with open(file_path, "w") as images_file:
-            images = []
             for output_info in output_info_list:
                 while len(images) <= output_info.index:
-                    images.append("")
+                    images.append({})
 
                 image_dict = OrderedDict()
                 image_dict["path"] = "sprites/" + \
                     os.path.basename(output_info.path)
                 image_dict["x"] = output_info.offset_x
                 image_dict["y"] = output_info.offset_y
+                if output_info.flags != 0:
+                    image_dict["flags"] = output_info.flags
+                if output_info.zoomOffset != 0:
+                    image_dict["zoomSprite"] = output_info.zoomSprite
 
                 images[output_info.index] = image_dict
 

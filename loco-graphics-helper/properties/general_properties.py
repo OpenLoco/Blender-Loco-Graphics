@@ -25,6 +25,16 @@ class GeneralProperties(bpy.types.PropertyGroup):
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
 
+    RCTPluginName = bpy.props.StringProperty(
+        name="RCT Tools Type",
+        description="Which fork of RCTTools is this project for.",
+        default="unk")
+
+    RCTPluginVersion = bpy.props.IntProperty(
+        name="RCT Tools Version",
+        description="What version of the fork this project is for. Number updates when a backwards-incompatible change is introduced.",
+        default=-1)
+
     number_of_animation_frames = bpy.props.IntProperty(
         name="Animation Frames",
         description="Number of animation frames. For example in use for swinging, rotating or animated ride vehicles, animated rides, and animated scenery",
@@ -112,26 +122,41 @@ class GeneralProperties(bpy.types.PropertyGroup):
         description="Whether or not the RCT add-on is currently rendering.",
         default=False)
 
+    transport_mode = bpy.props.EnumProperty(
+        name="Transport Mode",
+        items=(
+            ("RAIL","Rail","Railway vehicle",0),
+            ("ROAD","Road","Road or tram vehicle", 1),
+            ("AIR","Air","Aircraft", 2),
+            ("WATER","Water","Watercraft", 3)
+        )
+    )
+
+    # currently unused
     build_gx = bpy.props.BoolProperty(
         name="Generate GX (optimized sprite file)",
         description="Whether or not to create a .dat sprite file. Having GXC installed is required.",
         default=False)
 
+    # currently unused
     build_assetpack = bpy.props.BoolProperty(
         name="Generate the asset pack file",
         description="Whether or not to the ORCT2 asset pack file",
         default=False)
 
+    # currently unused
     copy_assetpack_to_orct2 = bpy.props.BoolProperty(
         name="Copy to OpenRCT2",
         description="Copy the generated .graphics file to the ORCT2 assetpack folder.",
         default=False)
 
+    # currently unused
     build_parkobj = bpy.props.BoolProperty(
         name="Generate .parkobj file",
         description="Automatically build the .parkobj file. An object.json file with the object description is required in the output folder.",
         default=False)
 
+    # currently unused
     copy_parkobj_to_orct2 = bpy.props.BoolProperty(
         name="Copy to OpenRCT2",
         description="Copy the generated .parkobj file to the ORCT2 objects folder. Linking your OpenRCT2 Documents folder is required in the add-on preferences.",

@@ -27,6 +27,12 @@ def object_type_update_func(self, context):
         props.flat_viewing_angles = "64"
         props.sloped_viewing_angles = "32"
 
+    # Reset to default for track pieces
+    if object.loco_graphics_helper_object_properties.object_type == "TRACK_PIECE":
+        props = object.loco_graphics_helper_track_piece_properties
+        props.flat_viewing_angles = "64"
+        props.sloped_viewing_angles = "32"
+
 
 class ObjectProperties(bpy.types.PropertyGroup):
     object_type = bpy.props.EnumProperty(
@@ -38,6 +44,7 @@ class ObjectProperties(bpy.types.PropertyGroup):
             ("CARGO", "Cargo", "", 3),
             ("CAR", "Car", "", 4),
             ("ANIMATION", "Animation position", "", 5),
+            ("TRACK_PIECE","Track piece","",6),
         ),
         default="NONE",
         update=object_type_update_func

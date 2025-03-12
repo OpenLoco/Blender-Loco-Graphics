@@ -21,6 +21,8 @@ class Output:
         self.index = 0
         self.offset_x = 0
         self.offset_y = 0
+        self.flags = 0
+        self.zoomOffset = 0
 
 # Frame processor for masking, dithering and cropping the final image
 
@@ -111,6 +113,8 @@ class PostProcessor(SubProcessor):
 
             output_info.offset_x += frame.offset_x
             output_info.offset_y += frame.offset_y
+            output_info.flags = frame.output_flags
+            output_info.zoomOffset = frame.output_zoomOffset
 
             frame.task.output_info.append(output_info)
 
@@ -129,6 +133,8 @@ class PostProcessor(SubProcessor):
             for j in range(frame.length):
                 tile_index = j * frame.width + i
                 final_output_index = frame.output_indices[tile_index]
+                if final_output_index < 0:
+                    continue
                 final_output_path = frame.get_final_output_paths()[tile_index]
                 tile_magic_command = MagickCommand(quantized_output_path)
 
@@ -148,20 +154,27 @@ class PostProcessor(SubProcessor):
                     result, final_output_index, final_output_path)
 
                 # Modify the output offsets for the sub tile we're processing
-                x, y = (i - (frame.width - 1) /
-                        2), (j - (frame.length - 1) / 2)
+                x, y = (i - (frame.width - 1) / 2), (j - (frame.length - 1) / 2)
 
                 rot = round(frame.view_angle / 90) % 4
-
+                
+                a = output_info.offset_x
+                b = output_info.offset_y
+                
+                if frame.mirror_x:
+                    x = -x
+                    rot = 4 - rot
+                
                 if rot == 1:
                     x, y = (-y,  x)
                 if rot == 2:
                     x, y = (-x, -y)
                 if rot == 3:
                     x, y = (y, -x)
-
+                
                 dx = -int((x * 32) - (y * 32))
-                dy = -int((y * 16) + (x * 16))
+                dy = -int((x * 16) + (y * 16))
+
 
                 output_info.offset_x += dx
                 output_info.offset_y += dy
@@ -171,6 +184,9 @@ class PostProcessor(SubProcessor):
 
                 output_info.offset_x += frame.offset_x
                 output_info.offset_y += frame.offset_y
+                print("FRAME NUMBER {}: Mirrored: {}, rot = {}, x = {}, y = {}, dx = {}, dy = {}, offset_x = {}, offset_y = {}".format(final_output_index,frame.mirror_x, rot, x, y, dx, dy, a, b, output_info.offset_x, output_info.offset_y))
+                output_info.flags = frame.output_flags
+                output_info.zoomOffset = frame.output_zoomOffset
 
                 output_infos.append(output_info)
 

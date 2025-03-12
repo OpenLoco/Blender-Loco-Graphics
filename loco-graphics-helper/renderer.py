@@ -38,7 +38,7 @@ class Renderer:
         self.context = context
 
         self.magick_path = "magick"
-        self.floyd_steinberg_diffusion = 5
+        self.floyd_steinberg_diffusion = 35
 
         self.palette_manager = palette_manager
 
