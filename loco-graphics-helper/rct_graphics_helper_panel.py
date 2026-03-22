@@ -37,7 +37,7 @@ class RepairConfirmOperator(bpy.types.Operator):
         return True
     
     def execute(self, context):
-        bpy.ops.render.loco_init()
+        bpy.ops.loco_eevee.initialize()
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -47,7 +47,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
     bl_label = "Loco Graphics Helper"
     bl_idname = "VIEW3D_PT_loco_graphics_helper"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
     bl_category = 'Loco Tools'
 
     def draw(self, context):
@@ -69,7 +69,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
         row.separator()
 
         row = layout.row()
-        row.label("General:")
+        row.label(text="General:")
 
         row = layout.row()
         row.prop(properties, "output_directory")
@@ -102,14 +102,14 @@ class GraphicsHelperPanel(bpy.types.Panel):
         row.separator()
 
         row = layout.row()
-        row.label("Dither Palette:")
+        row.label(text="Dither Palette:")
 
         row = layout.row()
         row.prop(properties, "palette", text="")
 
         if properties.palette == "CUSTOM":
             box = layout.box()
-            split = box.split(.50)
+            split = box.split(factor=.50)
             columns = [split.column(), split.column()]
             i = 0
             for color in palette_colors:
@@ -119,7 +119,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 i += 1
 
         row = layout.row()
-        row.label("Object Type:")
+        row.label(text="Object Type:")
 
         row = layout.row()
         row.prop(properties, "render_mode", text="")
@@ -174,7 +174,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.loco_static", text=text)
+        row.operator("loco_eevee.render_tiles", text=text)
 
     def draw_walls_panel(self, scene, layout):
         properties = scene.loco_graphics_helper_walls_properties
@@ -193,14 +193,14 @@ class GraphicsHelperPanel(bpy.types.Panel):
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.loco_walls", text=text)
+        row.operator("loco_eevee.render_walls", text=text)
 
     def draw_track_panel(self, scene, layout):
         properties = scene.loco_graphics_helper_track_properties
         general_properties = scene.loco_graphics_helper_general_properties
 
         row = layout.row()
-        row.label("Work in progress")
+        row.label(text="Work in progress")
         
         #row = layout.row()
         #row.operator("render.loco_track", text="Generate Splines")
@@ -231,7 +231,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
         if len(components) == 0:
             return   
         row = layout.row()
-        row.label("Car(s) details:")
+        row.label(text="Car(s) details:")
 
         for component in components:
             front = component.get_object(SubComponent.FRONT)
@@ -288,10 +288,10 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
             if not warning is None:
                 row = layout.row()
-                row.label("    WARNING: {},".format(warning))
+                row.label(text="    WARNING: {},".format(warning))
 
         row = layout.row()
-        row.label("Body(s) details:")
+        row.label(text="Body(s) details:")
         components = sorted(components, key=lambda x: x.body.loco_graphics_helper_vehicle_properties.index)
         for component in components:
             body = component.body
@@ -307,17 +307,17 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
             half_width = component.get_half_width()
             row = layout.row()
-            row.label("{}. {}".format(body.loco_graphics_helper_vehicle_properties.index, body.name))
+            row.label(text="{}. {}".format(body.loco_graphics_helper_vehicle_properties.index, body.name))
             row = layout.row()
-            row.label("  Half-Width: {}".format(self.blender_to_loco_dist(half_width)))
+            row.label(text="  Half-Width: {}".format(self.blender_to_loco_dist(half_width)))
             row = layout.row()
-            row.label("  Number of sprites: {}".format(number_of_sprites))
+            row.label(text="  Number of sprites: {}".format(number_of_sprites))
 
         bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
         bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         
         row = layout.row()
-        row.label("Bogie(s) details:")
+        row.label(text="Bogie(s) details:")
         for bogie in bogies:
             car = None
             sub_component = None
@@ -341,21 +341,29 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
             half_width = component.get_half_width()
             row = layout.row()
-            row.label("{}. {}".format(bogie.loco_graphics_helper_vehicle_properties.index, bogie.name))
+            row.label(text="{}. {}".format(bogie.loco_graphics_helper_vehicle_properties.index, bogie.name))
             row = layout.row()
-            row.label("  Number of sprites: {}".format(number_of_sprites))
+            row.label(text="  Number of sprites: {}".format(number_of_sprites))
         
         row = layout.row()
-        row.label("Total number of sprites: {}".format(total_number_of_sprites))
+        row.label(text="Total number of sprites: {}".format(total_number_of_sprites))
 
         if total_number_of_sprites == 0:
             row = layout.row()
-            row.label("NO BODIES OR BOGIES SET!")
+            row.label(text="NO BODIES OR BOGIES SET!")
             row = layout.row()
-            row.label("NOTHING WILL BE RENDERED!")
+            row.label(text="NOTHING WILL BE RENDERED!")
 
         row = layout.row()
         text = "Render"
         if general_properties.rendering:
             text = "Failed"
-        row.operator("render.loco_vehicle", text=text)
+        row.operator("loco_eevee.render_vehicle", text=text)
+
+def register_panel():
+    bpy.utils.register_class(GraphicsHelperPanel)
+    bpy.utils.register_class(RepairConfirmOperator)
+
+def unregister_panel():
+    bpy.utils.unregister_class(GraphicsHelperPanel)
+    bpy.utils.unregister_class(RepairConfirmOperator)

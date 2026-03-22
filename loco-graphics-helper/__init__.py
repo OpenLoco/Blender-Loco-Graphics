@@ -9,24 +9,19 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 
 import traceback
 
-from .properties.preferences import RCTGraphicsHelperPreferences
-from .properties.vehicle_properties import register_vehicles_properties, unregister_vehicles_properties
-from .properties.tiles_properties import register_tiles_properties, unregister_tiles_properties
-from .properties.walls_properties import register_walls_properties, unregister_walls_properties
-from .properties.general_properties import register_general_properties, unregister_general_properties
-from .properties.track_properties import register_track_properties, unregister_track_properties
-from .properties.object_properties import register_object_properties, unregister_object_properties
-from .rct_graphics_helper_panel import GraphicsHelperPanel
+from .register_classes import register_classes, unregister_classes
 from . import developer_utils
 import importlib
 import bpy
 
+plugin_name = "Locomotion Eevee Render Tool"
+
 bl_info = {
-    "name": "Loco Graphics Helper",
+    "name": "Locomotion Eevee Render Tool",
     "description": "Render tool to replicate Locomotion graphics (based on RCT Graphics Helper)",
     "author": "Olivier Wervers & OpenLoco Team",
-    "version": (0, 1, 6),
-    "blender": (2, 79, 0),
+    "version": (0, 2, 1),
+    "blender": (4, 3, 2),
     "location": "Render",
     "support": "COMMUNITY",
     "category": "Render"}
@@ -43,33 +38,15 @@ modules = developer_utils.setup_addon_modules(
 ##################################
 
 def register():
-    try:
-        bpy.utils.register_module(__name__)
-    except:
-        traceback.print_exc()
 
-    register_general_properties()
-    register_tiles_properties()
-    register_vehicles_properties()
-    register_walls_properties()
-    register_track_properties()
-    register_object_properties()
+    register_classes()
 
     print("Registered {} with {} modules".format(
-        bl_info["name"], len(modules)))
+        plugin_name, len(modules)))
 
 
 def unregister():
-    try:
-        bpy.utils.unregister_module(__name__)
-    except:
-        traceback.print_exc()
 
-    unregister_general_properties()
-    unregister_tiles_properties()
-    unregister_vehicles_properties()
-    unregister_walls_properties()
-    unregister_track_properties()
-    unregister_object_properties()
+    unregister_classes()
 
-    print("Unregistered {}".format(bl_info["name"]))
+    print("Unregistered {}".format(plugin_name))

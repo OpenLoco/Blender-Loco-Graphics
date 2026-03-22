@@ -28,7 +28,7 @@ class RenderProcessor(SubProcessor):
         # Render the main still and meta image
         self.renderer.set_layer(frame.layer)
         self.renderer.set_meta_output_path(
-            meta_render_output_folder, meta_render_output_file)
+            meta_render_output_folder, meta_render_output_file, frame.animation_frame_index)
         self.renderer.set_output_path(render_output)
 
         self.renderer.set_override_material(None)
@@ -51,7 +51,7 @@ class RenderProcessor(SubProcessor):
             naa_meta_render_output = frame.get_meta_render_output_file_name(
                 "naa_")
             self.renderer.set_meta_output_path(
-                meta_render_output_folder, naa_meta_render_output)
+                meta_render_output_folder, naa_meta_render_output, frame.animation_frame_index)
 
             self.renderer.set_override_material(None)
 

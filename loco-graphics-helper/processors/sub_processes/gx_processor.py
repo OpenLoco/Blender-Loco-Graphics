@@ -45,7 +45,7 @@ class GXProcessor(SubProcessor):
         if not general_props.build_assetpack:
             return
 
-        addon_prefs = task.context.user_preferences.addons["loco-graphics-helper"].preferences
+        addon_prefs = task.context.preferences.addons["loco-graphics-helper"].preferences
 
         if addon_prefs.opengraphics_directory == "":
             raise Exception(

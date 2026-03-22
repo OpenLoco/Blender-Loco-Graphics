@@ -45,9 +45,10 @@ class ObjectProperties(bpy.types.PropertyGroup):
 
 
 def register_object_properties():
+    bpy.utils.register_class(ObjectProperties)
     bpy.types.Object.loco_graphics_helper_object_properties = bpy.props.PointerProperty(
         type=ObjectProperties)
 
 
 def unregister_object_properties():
-    del bpy.types.Object.loco_graphics_helper_object_properties
+    bpy.utils.unregister_class(ObjectProperties)

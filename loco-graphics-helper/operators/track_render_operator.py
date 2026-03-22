@@ -15,7 +15,7 @@ from .render_operator import RCTRender
 
 
 class RenderTrack(RCTRender, bpy.types.Operator):
-    bl_idname = "render.loco_track"
+    bl_idname = "loco_eevee.render_track"
     bl_label = "Render Loco Track"
 
     def create_task(self, context):

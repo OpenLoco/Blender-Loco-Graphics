@@ -8,7 +8,7 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
 import bpy
-import math
+from ..res.res import get_scene_object
 
 # Builder for populating the scene with objects
 
@@ -23,206 +23,56 @@ class SceneBuilder:
     def build(self, context):
         scene = context.scene
 
-        self.remove_scene_object(context, "Lamp")
+        self.remove_data(bpy.data.scenes,"LOCO_EEVEE")
+        self.remove_data(bpy.data.node_groups,"LOCO_EEVEE Compositor")
+        self.remove_data(bpy.data.worlds, "LOCO_EEVEE World")
 
-        # Root rig object
-        rig_obj = self.create_scene_object(context, "Rig", None)
-        rig_obj.location = (0, 0, 0)
-        rig_obj.rotation_euler = (0, 0, math.radians(-45))
-        rig_obj.hide = True
-        rig_obj.hide_select = True
+        self.remove_scene_object(context, "Camera")
+        self.remove_scene_object(context, "Light")
 
-        rig_obj.rotation_mode = "YXZ"
+        has_tile_size_reference = "Tile Size Reference" in scene.objects
 
-        scene.objects.link(rig_obj)
+        self.remove_scene_object(context, "Tile Size Reference")
+        self.remove_scene_object_recursive(context, "Rig")
+        self.remove_collection(context, "LightCameraRig")
 
-        # Vertical joint object
-        vertical_joint_obj = self.create_scene_object(
-            context, "VerticalJoint", None)
-        vertical_joint_obj.location = (0, 0, 0)
-        vertical_joint_obj.hide = True
-        vertical_joint_obj.hide_select = True
+        get_scene_object("Scene", "LOCO_EEVEE")
+        new_scene = bpy.data.scenes["LOCO_EEVEE"]
 
-        scene.objects.link(vertical_joint_obj)
-        vertical_joint_obj.parent = rig_obj
+        self.move_data_to_new_scene(context, scene, new_scene)
 
-        # Camera object
-        camera_obj = self.create_camera(context)
+        context.window.scene = new_scene
+        context.window.view_layer = new_scene.view_layers[0]
 
-        scene.objects.link(camera_obj)
-        camera_obj.parent = vertical_joint_obj
+        bpy.data.scenes.remove(scene, do_unlink=True)
 
-        scene.camera = camera_obj
-
-        # Main light
-        main_light_obj = self.create_main_light(context)
-
-        scene.objects.link(main_light_obj)
-        main_light_obj.parent = vertical_joint_obj
-
-        # Filler light
-        filler_light_obj = self.create_filler_light(context)
-
-        scene.objects.link(filler_light_obj)
-        filler_light_obj.parent = vertical_joint_obj
-
-        # Dome light
-        dome_light_obj = self.create_light_dome(context)
-
-        scene.objects.link(dome_light_obj)
-        dome_light_obj.parent = vertical_joint_obj
-        
-        # Airplane shadows light
-        airplane_light_obj = self.create_airplane_shadow_light(context)
-
-        b = scene.objects.link(airplane_light_obj)
-        airplane_light_obj.parent = vertical_joint_obj
-        airplane_light_obj.layers[2] = True
-        airplane_light_obj.layers[0] = False
-        print(airplane_light_obj.layers[0])
-
-        # Environment lighting
-        light_settings = scene.world.light_settings
-        light_settings.use_ambient_occlusion = False
-        light_settings.use_environment_light = True
-        light_settings.environment_energy = 0.15
-        light_settings.gather_method = "RAYTRACE"
-        light_settings.distance = 0
-        light_settings.samples = 1
-
-        if not "ShadowCatcher" in context.scene.objects:
-            bpy.ops.mesh.primitive_plane_add(location=(0,0,0), radius=20)
-            shadow_catcher = bpy.context.active_object
-        else:
-            shadow_catcher = context.scene.objects["ShadowCatcher"]
-        shadow_catcher.name = "ShadowCatcher"
-        shadow_catcher.layers[2] = True
-        shadow_catcher.layers[0] = False
-        shadow_catcher.hide = True
-        shadow_catcher.hide_select = True
-        shadow_catcher.data.materials.append(bpy.data.materials.get("Shadow Capture"))
-
-    def create_camera(self, context):
-        name = self.prefix + "Camera" + self.suffix
-        if name in bpy.data.cameras:
-            bpy.data.cameras.remove(bpy.data.cameras[name])
-
-        camera_data = bpy.data.cameras.new(name=name)
-
-        camera_data.type = "ORTHO"
-        camera_data.ortho_scale = 45.2587
-
-        camera_data.clip_start = 220
-        camera_data.clip_end = 340
-
-        camera_data.sensor_fit = "HORIZONTAL"
-        camera_data.sensor_width = 1
-
-        camera_data.shift_y = 0.25
-
-        camera_object = self.create_scene_object(
-            context, "Camera", camera_data)
-
-        camera_object.hide_select = True
-        camera_object.location = (0, -241.947, 139.739)
-        camera_object.rotation_euler = (math.radians(60), 0, 0)
-
-        return camera_object
-
-    def create_main_light(self, context):
-        lamp_data = self.create_lamp_data(context, "MainLight", "SUN")
-
-        lamp_data.energy = 1.3
-        lamp_data.use_specular = True
-        lamp_data.use_diffuse = True
-        lamp_data.shadow_method = "RAY_SHADOW"
-        lamp_data.shadow_ray_sample_method = "ADAPTIVE_QMC"
-        lamp_data.shadow_ray_samples = 4
-        lamp_data.shadow_soft_size = 0.5
-        lamp_data.shadow_adaptive_threshold = 0.001
-
-        lamp_object = self.create_scene_object(context, 'Mainlight', lamp_data)
-
-        lamp_object.hide = True
-        lamp_object.hide_select = True
-        lamp_object.location = (0, 0, 0)
-        lamp_object.rotation_euler = (math.radians(67.5), 0, math.radians(90))
-
-        return lamp_object
-
-    def create_filler_light(self, context):
-        lamp_data = self.create_lamp_data(context, "FillerLight", "SUN")
-
-        lamp_data.energy = 0.5
-        lamp_data.use_specular = True
-        lamp_data.use_diffuse = True
-        lamp_data.shadow_method = "RAY_SHADOW"
-        lamp_data.shadow_ray_sample_method = "ADAPTIVE_QMC"
-        lamp_data.shadow_ray_samples = 4
-        lamp_data.shadow_soft_size = 0.5
-        lamp_data.shadow_adaptive_threshold = 0.001
-
-        lamp_object = self.create_scene_object(
-            context, 'FillerLight', lamp_data)
-
-        lamp_object.hide = True
-        lamp_object.hide_select = True
-        lamp_object.location = (0, 0, 0)
-        lamp_object.rotation_euler = (
-            0, math.radians(-72.5), math.radians(115))
-
-        return lamp_object
-
-    def create_light_dome(self, context):
-        lamp_data = self.create_lamp_data(context, "LightDome", "HEMI")
-        lamp_data.energy = 0.1
-        lamp_data.use_specular = False
-
-        lamp_object = self.create_scene_object(context, 'LightDome', lamp_data)
-        lamp_object.hide = True
-        lamp_object.hide_select = True
-
-        return lamp_object
-
-    def create_airplane_shadow_light(self, context):
-        lamp_data = self.create_lamp_data(context, "AirplaneShadowLight", "SUN")
-
-        lamp_data.energy = 1.3
-        lamp_data.use_specular = True
-        lamp_data.use_diffuse = True
-        lamp_data.shadow_method = "RAY_SHADOW"
-        lamp_data.shadow_ray_sample_method = "ADAPTIVE_QMC"
-        lamp_data.shadow_ray_samples = 4
-        lamp_data.shadow_soft_size = 0.5
-        lamp_data.shadow_adaptive_threshold = 0.001
-
-        lamp_object = self.create_scene_object(context, 'AirplaneShadowLight', lamp_data)
-
-        lamp_object.hide = True
-        lamp_object.hide_select = True
-        lamp_object.hide_render = True
-        lamp_object.location = (0, 0, 0)
-        lamp_object.rotation_euler = (math.radians(0), 0, math.radians(90))
-
-        return lamp_object
-
-    def create_scene_object(self, context, name, data=None):
-        name = self.prefix + name + self.suffix
-        if name in context.scene.objects:
-            bpy.data.objects.remove(
-                context.scene.objects[name], do_unlink=True)
-        return bpy.data.objects.new(name, data)
+    def remove_data(self, type, name):
+        if name in type:
+            #type.remove(type[name])
+            type[name].name = name + ".old"
 
     def remove_scene_object(self, context, name):
         if name in context.scene.objects:
             bpy.data.objects.remove(
                 context.scene.objects[name], do_unlink=True)
 
+    def remove_scene_object_recursive(self, context, name):
+        if name in context.scene.objects:
+            children_recursive = context.scene.objects[name].children_recursive
+            for child in children_recursive:
+                bpy.data.objects.remove(child, do_unlink = True)
 
-    def create_lamp_data(self, context, name, type):
-        name = self.prefix + name + self.suffix
-        if name in bpy.data.lamps:
-            bpy.data.lamps.remove(bpy.data.lamps[name])
+            bpy.data.objects.remove(context.scene.objects[name], do_unlink = True)
 
-        lamp_data = bpy.data.lamps.new(name=name, type=type)
-        return lamp_data
+    def remove_collection(self, context, name):
+        if name in bpy.data.collections:
+            children_recursive = bpy.data.collections[name].children_recursive
+            for child in children_recursive:
+                bpy.data.objects.remove(child, do_unlink=True)
+            bpy.data.collections.remove(bpy.data.collections[name], do_unlink=True)
+
+    def move_data_to_new_scene(self, context, old_scene, new_scene):
+        for object in old_scene.collection.objects:
+            new_scene.collection.objects.link(object)
+        for collection in old_scene.collection.children:
+            new_scene.collection.children.link(collection)

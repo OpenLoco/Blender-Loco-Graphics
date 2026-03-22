@@ -101,11 +101,11 @@ class Frame:
 
             object.location = self.target_object.matrix_world.translation
 
-        # This is a little hacky...
+        """# This is a little hacky...
         if self.layer == 'Top Down Shadow':
             bpy.data.objects['AirplaneShadowLight'].hide_render = False
         else:
-            bpy.data.objects['AirplaneShadowLight'].hide_render = True
+            bpy.data.objects['AirplaneShadowLight'].hide_render = True"""
 
         object.rotation_euler = (math.radians(self.bank_angle),
                                  math.radians(self.vertical_angle), math.radians(self.mid_angle))

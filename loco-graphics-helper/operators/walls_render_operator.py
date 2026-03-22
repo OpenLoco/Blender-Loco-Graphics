@@ -15,7 +15,7 @@ from .render_operator import RCTRender
 
 
 class RenderWalls(RCTRender, bpy.types.Operator):
-    bl_idname = "render.loco_walls"
+    bl_idname = "loco_eevee.render_walls"
     bl_label = "Render Loco Walls"
 
     def add_slopes_section(self, anim_frame, a_slope_frame_offset, b_slope_frame_offset):
@@ -86,7 +86,7 @@ class RenderWalls(RCTRender, bpy.types.Operator):
         # Create the list of frames with our parameters
         self.task_builder.clear()
         self.task_builder.set_anti_aliasing_with_background(
-            scene.render.use_antialiasing, general_props.anti_alias_with_background, general_props.maintain_aliased_silhouette)
+            scene.render.filter_size > 0.1, general_props.anti_alias_with_background, general_props.maintain_aliased_silhouette)
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
         self.task_builder.set_output_index(general_props.out_start_index)

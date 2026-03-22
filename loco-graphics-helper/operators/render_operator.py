@@ -32,14 +32,7 @@ def rotate_rig(angle, verAngle=0, bankedAngle=0, midAngle=0):
     vJoint.rotation_euler = (0, 0, math.radians(angle))
 
 
-class RCTRender(object):
-    def __init__(self):
-        self.context = None
-
-        self.task_builder = TaskBuilder()
-
-        self.palette_manager = PaletteManager()
-
+class RCTRender():
     @classmethod
     def poll(cls, context):
         return 'Rig' in bpy.data.objects is not None
@@ -51,11 +44,17 @@ class RCTRender(object):
     def execute(self, context):
         general_props = context.scene.loco_graphics_helper_general_properties
 
+        self.task_builder = TaskBuilder()
+
+        self.palette_manager = PaletteManager()
+
         rotate_rig(0, 0, 0, 0)
-        bpy.data.cameras["Camera"].ortho_scale = 169.72 / \
+
+        camera = context.scene.camera.data
+        camera.ortho_scale = 169.72 / \
             (1920 / context.scene.render.resolution_x)
 
-        bpy.data.cameras["Camera"].shift_x = -0.000345 * \
+        camera.shift_x = -0.000345 * \
             128 / context.scene.render.resolution_x
 
         def finish():

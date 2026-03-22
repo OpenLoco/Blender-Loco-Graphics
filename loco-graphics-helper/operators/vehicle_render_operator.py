@@ -16,7 +16,7 @@ from ..angle_sections.track import track_angle_sections, track_angle_sections_na
 
 
 class RenderVehicle(RCTRender, bpy.types.Operator):
-    bl_idname = "render.loco_vehicle"
+    bl_idname = "loco_eevee.render_vehicle"
     bl_label = "Render Loco Vehicle"
 
     def create_task(self, context):
@@ -24,7 +24,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
         self.task_builder.clear()
         self.task_builder.set_anti_aliasing_with_background(
-            context.scene.render.use_antialiasing, general_props.anti_alias_with_background, general_props.maintain_aliased_silhouette)
+            scene.render.filter_size > 0.1, general_props.anti_alias_with_background, general_props.maintain_aliased_silhouette)
         self.task_builder.set_output_index(general_props.out_start_index)
         self.task_builder.set_size(1, 1, False)
 

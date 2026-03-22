@@ -50,13 +50,13 @@ class VehicleProperties(bpy.types.PropertyGroup):
     for sprite_track_flag in sprite_track_flags_list:
         defaults.append(sprite_track_flag.default_value)
 
-    sprite_track_flags = bpy.props.BoolVectorProperty(
+    sprite_track_flags: bpy.props.BoolVectorProperty(
         name="Track Pieces",
         default=defaults,
         description="Which track pieces to render sprites for",
         size=len(sprite_track_flags_list))
 
-    flat_viewing_angles = bpy.props.EnumProperty(
+    flat_viewing_angles: bpy.props.EnumProperty(
         name="Number of Flat Viewing Angles",
         items=(
             ("8", "8", "", 8),
@@ -69,7 +69,7 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default="64"
     )
 
-    sloped_viewing_angles = bpy.props.EnumProperty(
+    sloped_viewing_angles: bpy.props.EnumProperty(
         name="Number of Sloped Viewing Angles",
         items=(
             ("4", "4", "Default for road/tram vehicles", 4),
@@ -80,49 +80,49 @@ class VehicleProperties(bpy.types.PropertyGroup):
         default="32"
     )
 
-    roll_angle = bpy.props.IntProperty(
+    roll_angle: bpy.props.IntProperty(
         name="Roll/Tilt Angle",
         description="If non-zero will render a +angle -angle roll image",
         default=0,
         min=0) 
 
-    index = bpy.props.IntProperty(
+    index: bpy.props.IntProperty(
         name="Body/Bogie Index",
         description="Controls the order of the bodies/bogies",
         default=1,
         min=1)
 
-    number_of_animation_frames = bpy.props.IntProperty(
+    number_of_animation_frames: bpy.props.IntProperty(
         name="Animation Frames",
         description="Number of animation frames. For example in use for animated wheels or cargo sprites",
         default=1,
         min=1)
 
-    rotational_symmetry = bpy.props.BoolProperty(
+    rotational_symmetry: bpy.props.BoolProperty(
         name="Rotational Symmetry",
         description="If model is symmetrical when rotated around z access this will half the number of sprites rendered",
         default=False
     )
 
-    braking_lights = bpy.props.BoolProperty(
+    braking_lights: bpy.props.BoolProperty(
         name="Has Braking Lights",
         description="If model has braking lights (located in layer 1) will render them",
         default=False
     )
 
-    is_airplane = bpy.props.BoolProperty(
+    is_airplane: bpy.props.BoolProperty(
         name="Is an airplane",
         description="If airplane will render airplane shadows (bogie)",
         default=False
     )
 
-    is_clone = bpy.props.BoolProperty(
+    is_clone: bpy.props.BoolProperty(
         name="Is a clone of another bogie/body",
         description="Clones will not be rendered and here just for show/location/meta data",
         default=False
     )
 
-    is_inverted = bpy.props.BoolProperty(
+    is_inverted: bpy.props.BoolProperty(
         name="Direction is inverted",
         description="Useful for clones to mark an inverted clone",
         default=False
@@ -130,9 +130,11 @@ class VehicleProperties(bpy.types.PropertyGroup):
 
 
 def register_vehicles_properties():
+    bpy.utils.register_class(VehicleProperties)
     bpy.types.Object.loco_graphics_helper_vehicle_properties = bpy.props.PointerProperty(
         type=VehicleProperties)
 
 
 def unregister_vehicles_properties():
+    bpy.utils.unregister_class(VehicleProperties)
     del bpy.types.Object.loco_graphics_helper_vehicle_properties

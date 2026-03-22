@@ -16,16 +16,17 @@ from ..builders.task_builder import TaskBuilder
 from ..operators.render_operator import RCTRender
 
 class TrackProperties(bpy.types.PropertyGroup):
-    placeholder = bpy.props.BoolProperty(
+    placeholder: bpy.props.BoolProperty(
         name="Placeholder",
         description="Test.",
         default=False)
 
 
 def register_track_properties():
+    bpy.utils.register_class(TrackProperties)
     bpy.types.Scene.loco_graphics_helper_track_properties = bpy.props.PointerProperty(
         type=TrackProperties)
 
 
 def unregister_track_properties():
-    del bpy.types.Scene.loco_graphics_helper_track_properties
+    bpy.utils.unregister_class(TrackProperties)

@@ -7,7 +7,6 @@ Interested in contributing? Visit https://github.com/oli414/Blender-RCT-Graphics
 RCT Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
-from operator import length_hint
 from ..frame import Frame
 from ..render_task import RenderTask
 

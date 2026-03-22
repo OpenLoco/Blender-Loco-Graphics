@@ -136,7 +136,7 @@ class ParkobjProcessor(SubProcessor):
         if not copy_to_objects:
             return
 
-        addon_prefs = task.context.user_preferences.addons["rct-graphics-helper"].preferences
+        addon_prefs = task.context.preferences.addons["rct-graphics-helper"].preferences
 
         target_dir = os.path.abspath(bpy.path.abspath(
             os.path.join(addon_prefs.orct2_directory, "object")))

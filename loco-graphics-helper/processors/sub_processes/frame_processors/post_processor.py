@@ -9,7 +9,6 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 
 import os
 import subprocess
-from unicodedata import ucnhash_CAPI
 
 from ....magick_command import MagickCommand
 from ..sub_processor import SubProcessor

@@ -12,10 +12,18 @@ import os
 import threading
 import bpy
 
-from .builders.materials_builder import MaterialsBuilder
-
 from .palette_manager import PaletteManager
 
+
+def get_compositing_node_group(scene):
+    return scene.compositing_node_group if bpy.app.version >= (5, 0, 0) else scene.node_tree
+
+def set_output_path(node, base, path, frame_number):
+    if bpy.app.version >= (5, 0, 0):
+        node.directory = base
+        node.file_name = path + "{:04d}".format(frame_number)
+    else:
+        node.base_path = base+"/"+path
 
 def find_material_by_name(material_name):
     for mat in bpy.data.materials:
@@ -25,10 +33,7 @@ def find_material_by_name(material_name):
 
 
 def find_node_by_label(tree, node_to_find):
-    for node in tree.nodes:
-        if node.label == node_to_find:
-            return node
-    return None
+    return None if node_to_find not in tree.nodes else tree.nodes[node_to_find]
 
 # Model for controlling the render settings, and starting render processes
 
@@ -46,18 +51,12 @@ class Renderer:
         self.timer = None
         self.render_finished_callback = None
 
-        self.world_position_material = find_material_by_name("WorldPosition")
+        camera = context.scene.camera.data
 
-        if self.world_position_material == None:
-            materials_builder = MaterialsBuilder()
-            materials_builder.create_world_position_material(context)
-            self.world_position_material = find_material_by_name(
-                "WorldPosition")
-
-        self.lens_shift_y_offset = round(bpy.data.cameras["Camera"].shift_y *
+        self.lens_shift_y_offset = round(camera.shift_y *
                                          context.scene.render.resolution_x)
 
-        self.started_with_anti_aliasing = context.scene.render.use_antialiasing
+        self.started_with_anti_aliasing = context.scene.render.filter_size > 0.1
 
         bpy.app.handlers.render_complete.append(self._render_finished)
         bpy.app.handlers.render_cancel.append(self._render_reset)
@@ -119,27 +118,29 @@ class Renderer:
 
     # Enabled or disables anti-aliasing for the next render
     def set_aa(self, aa):
-        self.context.scene.render.use_antialiasing = aa
+        pass
+        #self.context.scene.render.use_antialiasing = aa
 
     # Enabled or disables anti-aliasing with the background
     def set_aa_with_background(self, aa_with_background):
         aa_with_backgound_mix_node = find_node_by_label(
-            self.context.scene.node_tree, "aa_with_backgound_switch")
+            get_compositing_node_group(self.context.scene), "aa_with_background_switch")
 
-        if aa_with_backgound_mix_node == None:
+        if aa_with_backgound_mix_node is None:
             raise Exception(
                 "The compositing node tree does not contain a mix node for anti-aliasing with the background.")
 
         if aa_with_background:
-            aa_with_backgound_mix_node.inputs[0].default_value = 1
+            aa_with_backgound_mix_node.outputs[0].default_value = 1
         else:
-            aa_with_backgound_mix_node.inputs[0].default_value = 0
+            aa_with_backgound_mix_node.outputs[0].default_value = 0
 
     # Sets the global override material that the scene is rendered with
     def set_override_material(self, material):
-        self.context.scene.render.layers["Editor"].material_override = material
+        pass
+        """self.context.scene.render.layers["Editor"].material_override = material
         self.context.scene.render.layers["Braking Lights"].material_override = material
-        self.context.scene.render.layers["Top Down Shadow"].material_override = material
+        self.context.scene.render.layers["Top Down Shadow"].material_override = material"""
 
     def set_multi_tile_size(self, width, length):
         width_node = None
@@ -158,41 +159,39 @@ class Renderer:
 
     # Sets the active render layer
     def set_layer(self, layer_name):
-        layers = ["Editor", "Braking Lights", "Top Down Shadow"]
+        pass
+        """layers = ["Editor", "Braking Lights", "Top Down Shadow"]
 
         for layer in layers:
             self.context.scene.render.layers[layer].use = False
         self.context.scene.render.layers[layer_name].use = True
 
         input_layer_node = find_node_by_label(
-            self.context.scene.node_tree, "input_layer")
+            get_compositing_node_group(self.context.scene), "input_layer")
 
         if input_layer_node == None:
             raise Exception(
                 "The compositing node tree does not contain an input layer node.")
 
-        input_layer_node.layer = layer_name
+        input_layer_node.layer = layer_name"""
 
     def set_animation_frame(self, animation_frame_index):
         self.context.scene.frame_set(animation_frame_index)
 
     def set_cast_shadows(self, cast_shadows):
-        self.context.scene.render.use_shadows = cast_shadows
+        self.context.scene.eevee.use_shadows = cast_shadows
 
     # Sets the still render output path
     def set_output_path(self, path):
         self.context.scene.render.filepath = path
 
     # Sets the meta (material and tile mask) render output path
-    def set_meta_output_path(self, base, path):
+    def set_meta_output_path(self, base, path, frame_number):
         # Find the file output node in the compositor to set the output file name and path
         material_index_output_node = find_node_by_label(
-            self.context.scene.node_tree, "meta_output")
+            get_compositing_node_group(self.context.scene), "meta_output")
 
         if material_index_output_node == None:
             raise Exception(
                 "The compositing node tree does not contain an output node for the material index.")
-
-        # Set the file name and output path for the mask
-        material_index_output_node.base_path = base
-        material_index_output_node.file_slots[0].path = path
+        set_output_path(material_index_output_node, base, path, frame_number)

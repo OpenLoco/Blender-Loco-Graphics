@@ -17,26 +17,27 @@ from ..operators.render_operator import RCTRender
 
 
 class WallsProperties(bpy.types.PropertyGroup):
-    double_sided = bpy.props.BoolProperty(
+    double_sided: bpy.props.BoolProperty(
         name="Double Sided",
         description="Render the wall from four viewing angles. Useful for walls that have more thickness, or differently sided walls.",
         default=False)
 
-    sloped = bpy.props.BoolProperty(
+    sloped: bpy.props.BoolProperty(
         name="Sloped",
         description="Render the wall for sloped terrain.",
         default=False)
 
-    doorway = bpy.props.BoolProperty(
+    doorway: bpy.props.BoolProperty(
         name="Doorway",
         description="Render a doorway that vehicles can pass through.",
         default=False)
 
 
 def register_walls_properties():
+    bpy.utils.register_class(WallsProperties)
     bpy.types.Scene.loco_graphics_helper_walls_properties = bpy.props.PointerProperty(
         type=WallsProperties)
 
 
 def unregister_walls_properties():
-    del bpy.types.Scene.loco_graphics_helper_walls_properties
+    bpy.utils.unregister_class(WallsProperties)

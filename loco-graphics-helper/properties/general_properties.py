@@ -25,53 +25,54 @@ class GeneralProperties(bpy.types.PropertyGroup):
     script_file = os.path.realpath(__file__)
     directory = os.path.dirname(script_file)
 
-    number_of_animation_frames = bpy.props.IntProperty(
+    number_of_animation_frames: bpy.props.IntProperty(
         name="Animation Frames",
         description="Number of animation frames. For example in use for swinging, rotating or animated ride vehicles, animated rides, and animated scenery",
         default=1,
         min=1)
 
-    number_of_recolorables = bpy.props.IntProperty(
+    number_of_recolorables: bpy.props.IntProperty(
         name="Recolorables",
         description="Number of recolorables on this object.",
         default=0,
         min=0,
         max=2)
 
-    cast_shadows = bpy.props.BoolProperty(
+    cast_shadows: bpy.props.BoolProperty(
         name="Shadows",
         description="Control whether the lights should cast shadows.",
         default=True)
 
-    anti_alias_with_background = bpy.props.BoolProperty(
+    anti_alias_with_background: bpy.props.BoolProperty(
         name="Anti-Alias with Background",
         description="Causes an outline on objects. Exclusively found on RCT1 graphics.",
         default=False)
 
-    maintain_aliased_silhouette = bpy.props.BoolProperty(
+    maintain_aliased_silhouette: bpy.props.BoolProperty(
         name="Maintain Aliased Silhouette (For modular pieces)",
         description="The image is anti-aliased against the background, but is masked using the aliased silhoutte.",
         default=False)
 
-    out_start_index = bpy.props.IntProperty(
+    out_start_index: bpy.props.IntProperty(
         name="Output Starting Index",
         description="Number to start counting from for the output file names.",
         default=0,
         min=0)
 
-    y_offset = bpy.props.IntProperty(
+    y_offset: bpy.props.IntProperty(
         name="Sprite Y Offset",
         description="Additional Y offset to add to the sprite offsets.",
         default=0)
 
-    output_directory = bpy.props.StringProperty(
+    output_directory: bpy.props.StringProperty(
         name="Output Folder",
         description="Directory to output the sprites to.",
         maxlen=1024,
         subtype='DIR_PATH',
+        options=set() if bpy.app.version < (4,5,0) else {"PATH_SUPPORTS_BLEND_RELATIVE"},
         default="//output")
 
-    palette = bpy.props.EnumProperty(
+    palette: bpy.props.EnumProperty(
         name="Palette",
         items=(
             ("AUTO", "Automatic",
@@ -87,13 +88,13 @@ class GeneralProperties(bpy.types.PropertyGroup):
     for color in palette_colors:
         defaults.append(palette_colors_details[color]["default"])
 
-    custom_palette_colors = bpy.props.BoolVectorProperty(
+    custom_palette_colors: bpy.props.BoolVectorProperty(
         name="Custom Palette Colors",
         default=defaults,
         description="Which color groups to dither to. Recolorables will be excluded from this palette when used to avoid conflicts.",
         size=len(defaults))
 
-    render_mode = bpy.props.EnumProperty(
+    render_mode: bpy.props.EnumProperty(
         name="Render Mode",
         items=(
             ("TILES", "Tile(s)", "Renders an object from in-game viewing angles. Has the ability for multi-tile rendering.", 1),
@@ -107,41 +108,42 @@ class GeneralProperties(bpy.types.PropertyGroup):
         update=render_mode_update_func
     )
 
-    rendering = bpy.props.BoolProperty(
+    rendering: bpy.props.BoolProperty(
         name="Rendering",
         description="Whether or not the RCT add-on is currently rendering.",
         default=False)
 
-    build_gx = bpy.props.BoolProperty(
+    build_gx: bpy.props.BoolProperty(
         name="Generate GX (optimized sprite file)",
         description="Whether or not to create a .dat sprite file. Having GXC installed is required.",
         default=False)
 
-    build_assetpack = bpy.props.BoolProperty(
+    build_assetpack: bpy.props.BoolProperty(
         name="Generate the asset pack file",
         description="Whether or not to the ORCT2 asset pack file",
         default=False)
 
-    copy_assetpack_to_orct2 = bpy.props.BoolProperty(
+    copy_assetpack_to_orct2: bpy.props.BoolProperty(
         name="Copy to OpenRCT2",
         description="Copy the generated .graphics file to the ORCT2 assetpack folder.",
         default=False)
 
-    build_parkobj = bpy.props.BoolProperty(
+    build_parkobj: bpy.props.BoolProperty(
         name="Generate .parkobj file",
         description="Automatically build the .parkobj file. An object.json file with the object description is required in the output folder.",
         default=False)
 
-    copy_parkobj_to_orct2 = bpy.props.BoolProperty(
+    copy_parkobj_to_orct2: bpy.props.BoolProperty(
         name="Copy to OpenRCT2",
         description="Copy the generated .parkobj file to the ORCT2 objects folder. Linking your OpenRCT2 Documents folder is required in the add-on preferences.",
         default=False)
 
 
 def register_general_properties():
+    bpy.utils.register_class(GeneralProperties)
     bpy.types.Scene.loco_graphics_helper_general_properties = bpy.props.PointerProperty(
         type=GeneralProperties)
 
 
 def unregister_general_properties():
-    del bpy.types.Scene.loco_graphics_helper_general_properties
+    bpy.utils.unregister_class(GeneralProperties)
