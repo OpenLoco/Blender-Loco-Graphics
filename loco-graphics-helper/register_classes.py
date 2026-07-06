@@ -17,6 +17,7 @@ from .properties.walls_properties import register_walls_properties, unregister_w
 from .properties.general_properties import register_general_properties, unregister_general_properties
 from .properties.track_properties import register_track_properties, unregister_track_properties
 from .rct_graphics_helper_panel import register_panel, unregister_panel
+from .loco_object_helper_panel import register_object_panel, unregister_object_panel
 
 from .operators.init_operator import Init
 from .operators.render_tiles_operator import RenderTiles
@@ -34,6 +35,7 @@ def register_classes():
     register_walls_properties()
     register_track_properties()
     register_panel()
+    register_object_panel()
 
     bpy.utils.register_class(Init)
     bpy.utils.register_class(RenderTiles)
@@ -49,6 +51,7 @@ def unregister_classes():
     unregister_walls_properties()
     unregister_track_properties()
     unregister_panel()
+    unregister_object_panel()
 
     bpy.utils.unregister_class(Init)
     bpy.utils.unregister_class(RenderTiles)

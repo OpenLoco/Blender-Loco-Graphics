@@ -29,7 +29,7 @@ def object_type_update_func(self, context):
 
 
 class ObjectProperties(bpy.types.PropertyGroup):
-    object_type = bpy.props.EnumProperty(
+    object_type: bpy.props.EnumProperty(
         name="Object Type",
         items=(
             ("NONE", "None", "", 0),

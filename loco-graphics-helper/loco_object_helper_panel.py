@@ -22,7 +22,7 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         row = layout.row()
         if not "Rig" in context.scene.objects:
-            row.label("Tool is not intialised.")
+            row.label(text="Tool is not intialised.")
             return
         row.prop(object_properties, "object_type")
 
@@ -41,7 +41,7 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if not general_properties.render_mode == "VEHICLE":
-            row.label("Vehicle Render Mode Required")
+            row.label(text="Vehicle Render Mode Required")
             return
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
@@ -55,7 +55,7 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if not general_properties.render_mode == "VEHICLE":
-            row.label("Vehicle Render Mode Required")
+            row.label(text="Vehicle Render Mode Required")
             return
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
@@ -74,9 +74,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         box = layout.box()
 
         row = box.row()
-        row.label("Track Properties:")
+        row.label(text="Track Properties:")
 
-        split = box.split(.50)
+        split = box.split(factor=.50)
         columns = [split.column(), split.column()]
         i = 0
         for sprite_track_flagset in vehicle_properties.sprite_track_flags_list:
@@ -86,10 +86,10 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         row = layout.row()
 
-        row.label("Flat Viewing Angles: 32")
+        row.label(text="Flat Viewing Angles: 32")
         row = layout.row()
 
-        row.label("Sloped Viewing Angles: 32")
+        row.label(text="Sloped Viewing Angles: 32")
         row = layout.row()
 
         row.prop(vehicle_properties, "index")
@@ -107,7 +107,7 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if not general_properties.render_mode == "VEHICLE":
-            row.label("Vehicle Render Mode Required")
+            row.label(text="Vehicle Render Mode Required")
             return
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
@@ -126,9 +126,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         box = layout.box()
 
         row = box.row()
-        row.label("Track Properties:")
+        row.label(text="Track Properties:")
 
-        split = box.split(.50)
+        split = box.split(factor=.50)
         columns = [split.column(), split.column()]
         i = 0
         for sprite_track_flagset in vehicle_properties.sprite_track_flags_list:
@@ -138,12 +138,12 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         row = layout.row()
 
-        row.label("Flat Viewing Angles:")
+        row.label(text="Flat Viewing Angles:")
         row = layout.row()
         row.prop(vehicle_properties, "flat_viewing_angles", text="")
         row = layout.row()
 
-        row.label("Sloped Viewing Angles:")
+        row.label(text="Sloped Viewing Angles:")
         row = layout.row()
         row.prop(vehicle_properties, "sloped_viewing_angles", text="")
         row = layout.row()
@@ -158,7 +158,7 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if vehicle_properties.number_of_animation_frames != 1 and vehicle_properties.roll_angle != 0:
-            row.label("WARNING CANNOT HAVE BOTH ANIMATION FRAMES AND ROLL ANGLE SET")
+            row.label(text="WARNING CANNOT HAVE BOTH ANIMATION FRAMES AND ROLL ANGLE SET")
             row = layout.row()
 
         row.prop(vehicle_properties, "rotational_symmetry")
@@ -167,8 +167,13 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "braking_lights")
         row = layout.row()
         if vehicle_properties.braking_lights and vehicle_properties.roll_angle != 0:
-            row.label("WARNING CANNOT HAVE BOTH BRAKING LIGHTS AND ROLL ANGLE SET") 
+            row.label(text="WARNING CANNOT HAVE BOTH BRAKING LIGHTS AND ROLL ANGLE SET")
             row = layout.row()
 
         row.prop(vehicle_properties, "is_airplane")
         row = layout.row()
+
+def register_object_panel():
+    bpy.utils.register_class(LocoObjectHelperPanel)
+def unregister_object_panel():
+    bpy.utils.unregister_class(LocoObjectHelperPanel)
