@@ -10,6 +10,7 @@ RCT Graphics Helper is licensed under the GNU General Public License version 3.
 import bpy
 
 from .properties.preferences import RCTGraphicsHelperPreferences
+from .properties.object_properties import register_object_properties, unregister_object_properties
 from .properties.vehicle_properties import register_vehicles_properties, unregister_vehicles_properties
 from .properties.tiles_properties import register_tiles_properties, unregister_tiles_properties
 from .properties.walls_properties import register_walls_properties, unregister_walls_properties
@@ -27,6 +28,7 @@ from .builders.task_builder import TaskBuilder
 
 def register_classes():
     register_general_properties()
+    register_object_properties()
     register_tiles_properties()
     register_vehicles_properties()
     register_walls_properties()
@@ -41,6 +43,7 @@ def register_classes():
 
 def unregister_classes():
     unregister_general_properties()
+    unregister_object_properties()
     unregister_tiles_properties()
     unregister_vehicles_properties()
     unregister_walls_properties()
