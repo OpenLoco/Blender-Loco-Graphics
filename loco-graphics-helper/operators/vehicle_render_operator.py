@@ -21,6 +21,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
     def create_task(self, context):
         general_props = context.scene.loco_graphics_helper_general_properties
+        scene = context.scene
 
         self.task_builder.clear()
         self.task_builder.set_anti_aliasing_with_background(
@@ -36,7 +37,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        bodies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone]
         bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         for body_object in bodies:
             self.add_render_angles(body_object)
@@ -47,7 +48,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
             self.task_builder.set_palette(self.palette_manager.get_shadow_palette())
             self.add_airplane_shadow_render_angles(bodies[0])
         else:
-            bogies = [x for x in context.scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+            bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
             bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
             for bogie_object in bogies:
                 self.add_render_angles(bogie_object)

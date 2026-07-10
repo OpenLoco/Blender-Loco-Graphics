@@ -272,19 +272,19 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 front_idx = 0
             
             row = layout.row()
-            row.label("{}. {}, {}, {}, {}".format(component.car.loco_graphics_helper_vehicle_properties.index - 1, component.car.name, body.name, front_name, back_name))
+            row.label(text="{}. {}, {}, {}, {}".format(component.car.loco_graphics_helper_vehicle_properties.index - 1, component.car.name, body.name, front_name, back_name))
             row = layout.row()
-            row.label("  Front Position: {}".format(self.blender_to_loco_dist(front_position)))
+            row.label(text="  Front Position: {}".format(self.blender_to_loco_dist(front_position)))
             row = layout.row()
-            row.label("  Back Position: {}".format(self.blender_to_loco_dist(back_position)))
+            row.label(text="  Back Position: {}".format(self.blender_to_loco_dist(back_position)))
             row = layout.row()
-            row.label("  Front Bogie Sprite Index: {}".format(front_idx))
+            row.label(text="  Front Bogie Sprite Index: {}".format(front_idx))
             row = layout.row()
-            row.label("  Back Bogie Sprite Index: {}".format(back_idx))
+            row.label(text="  Back Bogie Sprite Index: {}".format(back_idx))
             row = layout.row()
-            row.label("  Body Sprite Index: {}".format(body_idx))
+            row.label(text="  Body Sprite Index: {}".format(body_idx))
             row = layout.row()
-            row.label("  Animation Position: {}".format(anim_location))
+            row.label(text="  Animation Position: {}".format(anim_location))
 
             if not warning is None:
                 row = layout.row()

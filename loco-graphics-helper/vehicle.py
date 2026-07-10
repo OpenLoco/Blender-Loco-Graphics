@@ -103,7 +103,7 @@ class VehicleComponent:
         return (min(mins), max(maxs))
 
     def _get_min_max_axis_bound_box_corners(self, object, axis):
-        bbox_corners = [object.matrix_world * Vector(corner) for corner in object.bound_box]
+        bbox_corners = [object.matrix_world @ Vector(corner) for corner in object.bound_box]
         min_x = min([x[axis] for x in bbox_corners])
         max_x = max([x[axis] for x in bbox_corners])
         return (min_x, max_x)
