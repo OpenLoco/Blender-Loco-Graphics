@@ -39,3 +39,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Blender temp files
+*.blend1
+
+# KDevelop project files
+*.kdev4
