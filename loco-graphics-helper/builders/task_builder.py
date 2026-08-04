@@ -99,6 +99,9 @@ class TaskBuilder:
         self.angles.append(frame)
         self.output_index = self.output_index + 1
 
+    def add_null_frames(self, number):
+        self.output_index += number
+
     # Adds render angles for the given number of viewing angles relative to the currently configured rotation
     def add_viewing_angles(self, number_of_viewing_angles, animation_frame_index=0, animation_frames=1, rotational_symmetry=False):
 

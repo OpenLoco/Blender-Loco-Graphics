@@ -111,13 +111,13 @@ class VehicleProperties(bpy.types.PropertyGroup):
     )
 
     is_airplane: bpy.props.BoolProperty(
-        name="Is an airplane",
+        name="Body is airplane",
         description="This body component stores the airplane shadows (work-in-progress)",
         default=False
     )
 
     is_clone: bpy.props.BoolProperty(
-        name="Is a duplicate of another component",
+        name="Duplicate of another component",
         description="This component is identical to another component which is already being rendered",
         default=False
     )
@@ -127,6 +127,23 @@ class VehicleProperties(bpy.types.PropertyGroup):
         description="The component is drawn facing backwards when placed on the road/rails",
         default=False
     )
+
+    render_sprite: bpy.props.BoolProperty(
+        name="Render component",
+        description="Include this component when batch rendering",
+        default=True
+    )
+
+    null_component: bpy.props.BoolProperty(
+        name="Null component",
+        description="This component is not rendered in the game",
+        default=False
+    )
+
+    bounding_box_override: bpy.props.PointerProperty(
+        type=bpy.types.Object,
+        name="Boundbox Override",
+        description="Object to use when determining center of rotation and body parameters")
 
 
 def register_vehicles_properties():

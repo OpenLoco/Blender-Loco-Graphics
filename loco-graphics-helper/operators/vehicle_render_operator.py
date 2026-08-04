@@ -13,6 +13,7 @@ import os
 
 from ..operators.render_operator import RCTRender
 from ..angle_sections.track import track_angle_sections, track_angle_sections_names
+from ..vehicle import get_number_of_sprites
 
 
 class RenderVehicle(RCTRender, bpy.types.Operator):
@@ -37,7 +38,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
         self.task_builder.set_palette(self.palette_manager.get_base_palette(
             general_props.palette, general_props.number_of_recolorables, "FULL"))
 
-        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone and not x.loco_graphics_helper_vehicle_properties.null_component]
         bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
         for body_object in bodies:
             self.add_render_angles(body_object)
@@ -48,7 +49,7 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
             self.task_builder.set_palette(self.palette_manager.get_shadow_palette())
             self.add_airplane_shadow_render_angles(bodies[0])
         else:
-            bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+            bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone and not x.loco_graphics_helper_vehicle_properties.null_component]
             bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
             for bogie_object in bogies:
                 self.add_render_angles(bogie_object)
@@ -75,6 +76,11 @@ class RenderVehicle(RCTRender, bpy.types.Operator):
 
     def add_render_angles(self, object):
         props = object.loco_graphics_helper_vehicle_properties
+
+        if not props.render_sprite:
+            self.task_builder.add_null_frames(get_number_of_sprites(object))
+            return
+
         is_bogie = object.loco_graphics_helper_object_properties.object_type == "BOGIE"
         target_object = object
         animation_frames = props.number_of_animation_frames

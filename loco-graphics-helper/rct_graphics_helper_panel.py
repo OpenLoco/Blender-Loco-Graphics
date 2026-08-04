@@ -24,7 +24,7 @@ from .operators.render_tiles_operator import RenderTiles
 
 from .models.palette import palette_colors, palette_colors_details
 
-from .vehicle import get_car_components, VehicleComponent, SubComponent
+from .vehicle import get_car_components, VehicleComponent, SubComponent, get_number_of_sprites, get_half_width
 
 class RepairConfirmOperator(bpy.types.Operator):
     """This action will clear out the default camera and light. Changes made to the rig object, compositor nodes and recolorable materials will be lost."""
@@ -201,6 +201,10 @@ class GraphicsHelperPanel(bpy.types.Panel):
     def blender_to_loco_dist(dist):
         return int(dist * 32 + 0.5)
 
+    @staticmethod
+    def calculate_precision(x):
+        return [y for y in range(8) if (1 << y) == int(x)][0] - 2
+
     def draw_vehicle_panel(self, scene, layout):
         general_properties = scene.loco_graphics_helper_general_properties
 
@@ -211,10 +215,11 @@ class GraphicsHelperPanel(bpy.types.Panel):
         cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
 
         total_number_of_sprites = 0
+        renderable_sprites = 0
 
         components = get_car_components(cars)
         if len(components) == 0:
-            return   
+            return
         row = layout.row()
         row.label(text="Car(s) details:")
 
@@ -224,120 +229,117 @@ class GraphicsHelperPanel(bpy.types.Panel):
             body = component.get_object(SubComponent.BODY)
             idx = body.loco_graphics_helper_vehicle_properties.index
 
-            front_position = 0
-            back_position = 0
-            body_idx = idx - 1 + 180 if body.loco_graphics_helper_vehicle_properties.is_inverted else idx - 1
-            front_idx = 255
-            back_idx = 255
+            front_position = -1.0/32
+            back_position = -1.0/32
+            body_idx = component.get_component_index(SubComponent.BODY)
+            front_idx = component.get_component_index(SubComponent.FRONT)
+            back_idx = component.get_component_index(SubComponent.BACK)
             warning = None
             anim_location = 0
             front_name = '' if front is None else front.name
             back_name = '' if back is None else back.name
             mid_point_x = component.get_preferred_body_midpoint()
-            if not math.isclose(body.matrix_world.translation[0], mid_point_x, rel_tol=1e-4):
-                warning = "BODY LOCATION IS NOT AT PREFERRED MID X POINT! {}".format(mid_point_x)
+            #TODO 2026-08-03: fix this to accurately determine when the body origin is not halfway between the bogies, as well as determine the bogie positions accurately
+            if body.loco_graphics_helper_vehicle_properties.bounding_box_override is None and not math.isclose(body.matrix_world.translation[0], mid_point_x, rel_tol=1e-4):
+                warning = "Body location is not at midpoint, off by {}".format(mid_point_x)
 
-            if not front is None:
+            if front is not None:
                 front_position = component.get_bogie_position(SubComponent.FRONT)
+            if back is not None:
                 back_position = component.get_bogie_position(SubComponent.BACK)
 
-                if component.get_number_of_sprites(SubComponent.FRONT) != 0:
-                    front_idx = front.loco_graphics_helper_vehicle_properties.index - 1
-                    front_idx = front_idx + 180 if front.loco_graphics_helper_vehicle_properties.is_inverted else front_idx
-
-                if component.get_number_of_sprites(SubComponent.BACK) != 0:
-                    back_idx = back.loco_graphics_helper_vehicle_properties.index - 1
-                    back_idx = back_idx + 180 if front.loco_graphics_helper_vehicle_properties.is_inverted else back_idx
-
-                anim_location = component.get_animation_location()
-                if anim_location > 255 or anim_location < 0:
-                    warning = "Animation is too far from bogies"
+                #TODO 2026-08-03: why is this in the back classmethod
+                anim_location = component.get_emitter_x()
+                if anim_location is not None and (anim_location > 255 or anim_location < 0):
+                    warning = "Emitter is too far from bogies"
                     anim_location = 255
-            elif body.loco_graphics_helper_vehicle_properties.is_airplane:
+            elif body.loco_graphics_helper_properties.is_airplane:
                 front_idx = 0
-            
-            row = layout.row()
-            row.label(text="{}. {}, {}, {}, {}".format(component.car.loco_graphics_helper_vehicle_properties.index - 1, component.car.name, body.name, front_name, back_name))
-            row = layout.row()
-            row.label(text="  Front Position: {}".format(self.blender_to_loco_dist(front_position)))
-            row = layout.row()
-            row.label(text="  Back Position: {}".format(self.blender_to_loco_dist(back_position)))
-            row = layout.row()
-            row.label(text="  Front Bogie Sprite Index: {}".format(front_idx))
-            row = layout.row()
-            row.label(text="  Back Bogie Sprite Index: {}".format(back_idx))
-            row = layout.row()
-            row.label(text="  Body Sprite Index: {}".format(body_idx))
-            row = layout.row()
-            row.label(text="  Animation Position: {}".format(anim_location))
+                back_idx = 255
+                front_position = 0
+                back_position = 0
 
-            if not warning is None:
-                row = layout.row()
+
+            box = layout.box()
+            box.label(text="Car {}: {}".format(component.car.loco_graphics_helper_vehicle_properties.index, component.car.name))
+            col = box.column()
+            col.label(text="{}, {}, {}".format(body.name, front_name, back_name))
+            col.label(text="  Front Position: {}".format(self.blender_to_loco_dist(front_position)))
+            col.label(text="  Back Position: {}".format(self.blender_to_loco_dist(back_position)))
+            col.label(text="  Front Bogie Sprite Index: {}".format(front_idx))
+            col.label(text="  Back Bogie Sprite Index: {}".format(back_idx))
+            col.label(text="  Body Sprite Index: {}".format(body_idx))
+            if not anim_location is None:
+                col.label(text="  Emitter Horizontal Position: {}".format(anim_location))
+
+            if warning is not None:
+                row = box.row()
                 row.label(text="    WARNING: {},".format(warning))
 
-        row = layout.row()
-        row.label(text="Body(s) details:")
-        components = sorted(components, key=lambda x: x.body.loco_graphics_helper_vehicle_properties.index)
-        for component in components:
-            body = component.body
-            if body is None:
-                continue
-            if body.loco_graphics_helper_vehicle_properties.is_clone:
-                continue
-            number_of_sprites = component.get_number_of_sprites(SubComponent.BODY)
-            total_number_of_sprites = total_number_of_sprites + number_of_sprites
+        bodies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BODY" and not x.loco_graphics_helper_vehicle_properties.is_clone and get_number_of_sprites(x) > 0]
+        bodies = sorted(bodies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
+        
+        if len(bodies) > 0:
+            for body in bodies:
+                number_of_sprites = get_number_of_sprites(body)
+                total_number_of_sprites += number_of_sprites
 
-            if number_of_sprites == 0:
-                continue
+                half_width = -1.0/32
+                car = None
+                if body.loco_graphics_helper_vehicle_properties.bounding_box_override:
+                    half_width = get_half_width(body.loco_graphics_helper_vehicle_properties.bounding_box_override)
+                for component in components:
+                    if component.body == body:
+                        car = component
+                        half_width = component.get_half_width()
+                        break
+                emitter_z = car.get_emitter_z()
 
-            half_width = component.get_half_width()
-            row = layout.row()
-            row.label(text="{}. {}".format(body.loco_graphics_helper_vehicle_properties.index, body.name))
-            row = layout.row()
-            row.label(text="  Half-Width: {}".format(self.blender_to_loco_dist(half_width)))
-            row = layout.row()
-            row.label(text="  Number of sprites: {}".format(number_of_sprites))
+                if number_of_sprites == 0:
+                    continue
 
-        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone]
+                if body.loco_graphics_helper_vehicle_properties.render_sprite:
+                    renderable_sprites += number_of_sprites
+
+                box = layout.box()
+                row = box.row()
+                row.label(text="Body {}: {}".format(body.loco_graphics_helper_vehicle_properties.index, body.name))
+                row.prop(body.loco_graphics_helper_vehicle_properties, "render_sprite")
+                col = box.column()
+                col.label(text="  Flat Rotation Frames: {}".format(body.loco_graphics_helper_vehicle_properties.flat_viewing_angles))
+                col.label(text="  Sloped Rotation Frames: {}".format(body.loco_graphics_helper_vehicle_properties.sloped_viewing_angles))
+                col.label(text="  Tilt Frames: {}".format(3 if body.loco_graphics_helper_vehicle_properties.roll_angle != 0 else 1))
+                col.label(text="  Half-Length: {}{}".format(self.blender_to_loco_dist(half_width), " (override)" if body.loco_graphics_helper_vehicle_properties.bounding_box_override else ""))
+                col.label(text="  Flat Yaw Accuracy: {}".format(self.calculate_precision(body.loco_graphics_helper_vehicle_properties.flat_viewing_angles)))
+                col.label(text="  Sloped Yaw Accuracy: {}".format(self.calculate_precision(body.loco_graphics_helper_vehicle_properties.sloped_viewing_angles)))
+                col.label(text="  Frames per Viewing Angle: {}".format(0))
+                col.label(text="  Number of sprites: {}".format(number_of_sprites))
+                if not emitter_z is None:
+                    col.label(text="  Emitter Vertical Position: {}".format(emitter_z))
+
+        bogies = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "BOGIE" and not x.loco_graphics_helper_vehicle_properties.is_clone and get_number_of_sprites(x) > 0]
         bogies = sorted(bogies, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)
-        
+
+        if len(bogies) > 0:
+            for bogie in bogies:
+                number_of_sprites = get_number_of_sprites(bogie)
+                total_number_of_sprites += number_of_sprites
+
+                if bogie.loco_graphics_helper_vehicle_properties.render_sprite:
+                    renderable_sprites += number_of_sprites
+
+                box = layout.box()
+                row = box.row()
+                row.label(text="Bogie {}: {}".format(bogie.loco_graphics_helper_vehicle_properties.index, bogie.name))
+                row.prop(bogie.loco_graphics_helper_vehicle_properties, "render_sprite")
+                col = box.column()
+                col.label(text="  Number of sprites: {}".format(number_of_sprites))
+
         row = layout.row()
-        row.label(text="Bogie(s) details:")
-        for bogie in bogies:
-            car = None
-            sub_component = None
-            for component in components:
-                if component.front == bogie:
-                    car = component
-                    sub_component = SubComponent.FRONT
-                    break
-                if component.back == bogie:
-                    car = component
-                    sub_component = SubComponent.BACK
-                    break
-            if car is None:
-                continue
-            
-            number_of_sprites = car.get_number_of_sprites(sub_component)
-            total_number_of_sprites = total_number_of_sprites + number_of_sprites
-
-            if number_of_sprites == 0:
-                continue
-
-            half_width = component.get_half_width()
-            row = layout.row()
-            row.label(text="{}. {}".format(bogie.loco_graphics_helper_vehicle_properties.index, bogie.name))
-            row = layout.row()
-            row.label(text="  Number of sprites: {}".format(number_of_sprites))
-        
-        row = layout.row()
-        row.label(text="Total number of sprites: {}".format(total_number_of_sprites))
-
-        if total_number_of_sprites == 0:
-            row = layout.row()
-            row.label(text="NO BODIES OR BOGIES SET!")
-            row = layout.row()
-            row.label(text="NOTHING WILL BE RENDERED!")
+        if renderable_sprites > 0:
+            row.label(text="Sprites to render: {}".format(renderable_sprites))
+        else:
+            row.label(text="WARNING: 0 sprites to render")
 
         row = layout.row()
         text = "Render"

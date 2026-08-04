@@ -60,6 +60,12 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "null_component")
+        row = layout.row()
+
+        if vehicle_properties.null_component:
+            return
+
         row.prop(vehicle_properties, "index")
         row = layout.row()
 
@@ -99,6 +105,8 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row.prop(vehicle_properties, "rotational_symmetry")
         row = layout.row()
 
+        row.prop(vehicle_properties, "bounding_box_override")
+
     def draw_body_panel(self, context, layout):
         scene = context.scene
         general_properties = scene.loco_graphics_helper_general_properties
@@ -109,6 +117,12 @@ class LocoObjectHelperPanel(bpy.types.Panel):
             return
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
+
+        row.prop(vehicle_properties, "null_component")
+        row = layout.row()
+
+        if vehicle_properties.null_component:
+            return
 
         row.prop(vehicle_properties, "index")
         row = layout.row()
@@ -121,6 +135,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         if vehicle_properties.is_clone:
             return
+
+        row.prop(vehicle_properties, "render_sprite")
+        row = layout.row()
         
         box = layout.box()
 
@@ -171,6 +188,8 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         row.prop(vehicle_properties, "is_airplane")
         row = layout.row()
+
+        row.prop(vehicle_properties, "bounding_box_override")
 
 def register_object_panel():
     bpy.utils.register_class(LocoObjectHelperPanel)
