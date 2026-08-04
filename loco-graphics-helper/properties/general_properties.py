@@ -123,32 +123,6 @@ class GeneralProperties(bpy.types.PropertyGroup):
         )
     )
 
-    build_gx: bpy.props.BoolProperty(
-        name="Generate GX (optimized sprite file)",
-        description="Whether or not to create a .dat sprite file. Having GXC installed is required.",
-        default=False)
-
-    build_assetpack: bpy.props.BoolProperty(
-        name="Generate the asset pack file",
-        description="Whether or not to the ORCT2 asset pack file",
-        default=False)
-
-    copy_assetpack_to_orct2: bpy.props.BoolProperty(
-        name="Copy to OpenRCT2",
-        description="Copy the generated .graphics file to the ORCT2 assetpack folder.",
-        default=False)
-
-    build_parkobj: bpy.props.BoolProperty(
-        name="Generate .parkobj file",
-        description="Automatically build the .parkobj file. An object.json file with the object description is required in the output folder.",
-        default=False)
-
-    copy_parkobj_to_orct2: bpy.props.BoolProperty(
-        name="Copy to OpenRCT2",
-        description="Copy the generated .parkobj file to the ORCT2 objects folder. Linking your OpenRCT2 Documents folder is required in the add-on preferences.",
-        default=False)
-
-
 def register_general_properties():
     bpy.utils.register_class(GeneralProperties)
     bpy.types.Scene.loco_graphics_helper_general_properties = bpy.props.PointerProperty(

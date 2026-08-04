@@ -137,24 +137,6 @@ class GraphicsHelperPanel(bpy.types.Panel):
         elif properties.render_mode == "TRACK":
             self.draw_track_panel(scene, box)
 
-        row = layout.row()
-        row.prop(properties, "build_gx")
-
-        if properties.build_gx:
-            box = layout.box()
-            box.prop(properties, "build_assetpack")
-
-            if properties.build_assetpack:
-                box2 = box.box()
-                box2.prop(properties, "copy_assetpack_to_orct2")
-
-        row = layout.row()
-        row.prop(properties, "build_parkobj")
-
-        if properties.build_parkobj:
-            box = layout.box()
-            box.prop(properties, "copy_parkobj_to_orct2")
-
     def draw_tiles_panel(self, scene, layout):
         properties = scene.loco_graphics_helper_static_properties
         general_properties = scene.loco_graphics_helper_general_properties
