@@ -60,6 +60,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
         row.prop(vehicle_properties, "is_clone")
         row = layout.row()
 
@@ -67,14 +70,12 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if vehicle_properties.is_clone:
-            row.prop(vehicle_properties, "index",text="Clone of bogie index:")
-            row = layout.row()
             return
 
         box = layout.box()
 
         row = box.row()
-        row.label(text="Track Properties:")
+        row.label(text="Sprites:")
 
         split = box.split(factor=.50)
         columns = [split.column(), split.column()]
@@ -90,9 +91,6 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         row.label(text="Sloped Viewing Angles: 32")
-        row = layout.row()
-
-        row.prop(vehicle_properties, "index")
         row = layout.row()
 
         row.prop(vehicle_properties, "number_of_animation_frames")
@@ -112,6 +110,9 @@ class LocoObjectHelperPanel(bpy.types.Panel):
 
         vehicle_properties = context.object.loco_graphics_helper_vehicle_properties
 
+        row.prop(vehicle_properties, "index")
+        row = layout.row()
+
         row.prop(vehicle_properties, "is_clone")
         row = layout.row()
 
@@ -119,14 +120,12 @@ class LocoObjectHelperPanel(bpy.types.Panel):
         row = layout.row()
 
         if vehicle_properties.is_clone:
-            row.prop(vehicle_properties, "index",text="Clone of body index:")
-            row = layout.row()
             return
         
         box = layout.box()
 
         row = box.row()
-        row.label(text="Track Properties:")
+        row.label(text="Sprites:")
 
         split = box.split(factor=.50)
         columns = [split.column(), split.column()]

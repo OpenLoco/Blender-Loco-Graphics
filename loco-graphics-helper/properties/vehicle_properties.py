@@ -82,49 +82,49 @@ class VehicleProperties(bpy.types.PropertyGroup):
 
     roll_angle: bpy.props.IntProperty(
         name="Roll/Tilt Angle",
-        description="If non-zero will render a +angle -angle roll image",
+        description="Renders a left and right tilting sprite at the specified angle if non-zero",
         default=0,
         min=0) 
 
     index: bpy.props.IntProperty(
-        name="Body/Bogie Index",
-        description="Controls the order of the bodies/bogies",
-        default=1,
-        min=1)
+        name="Component Index",
+        description="Car, Body, or Bogie index",
+        default=0,
+        min=0)
 
     number_of_animation_frames: bpy.props.IntProperty(
         name="Animation Frames",
-        description="Number of animation frames. For example in use for animated wheels or cargo sprites",
+        description="Number of keyframed animation frames. Used for animated wheels and cargo, or roll sprites if needed",
         default=1,
         min=1)
 
     rotational_symmetry: bpy.props.BoolProperty(
         name="Rotational Symmetry",
-        description="If model is symmetrical when rotated around z access this will half the number of sprites rendered",
+        description="Component has 180-degree rotational symmetry. Reduces sprite count by half",
         default=False
     )
 
     braking_lights: bpy.props.BoolProperty(
         name="Has Braking Lights",
-        description="If model has braking lights (located in layer 1) will render them",
+        description="Renders brake lights (work-in-progress)",
         default=False
     )
 
     is_airplane: bpy.props.BoolProperty(
         name="Is an airplane",
-        description="If airplane will render airplane shadows (bogie)",
+        description="This body component stores the airplane shadows (work-in-progress)",
         default=False
     )
 
     is_clone: bpy.props.BoolProperty(
-        name="Is a clone of another bogie/body",
-        description="Clones will not be rendered and here just for show/location/meta data",
+        name="Is a duplicate of another component",
+        description="This component is identical to another component which is already being rendered",
         default=False
     )
 
     is_inverted: bpy.props.BoolProperty(
-        name="Direction is inverted",
-        description="Useful for clones to mark an inverted clone",
+        name="Component is reversed",
+        description="The component is drawn facing backwards when placed on the road/rails",
         default=False
     )
 
