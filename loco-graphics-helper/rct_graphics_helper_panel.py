@@ -24,7 +24,7 @@ from .operators.render_tiles_operator import RenderTiles
 
 from .models.palette import palette_colors, palette_colors_details
 
-from .vehicle import get_car_components, VehicleComponent, SubComponent, get_number_of_sprites, get_half_width
+from .vehicle import get_car_components, VehicleComponent, SubComponent, get_number_of_sprites
 
 class RepairConfirmOperator(bpy.types.Operator):
     """This action will clear out the default camera and light. Changes made to the rig object, compositor nodes and recolorable materials will be lost."""
@@ -239,16 +239,13 @@ class GraphicsHelperPanel(bpy.types.Panel):
             front_name = '' if front is None else front.name
             back_name = '' if back is None else back.name
             mid_point_x = component.get_preferred_body_midpoint()
-            #TODO 2026-08-03: fix this to accurately determine when the body origin is not halfway between the bogies, as well as determine the bogie positions accurately
-            if body.loco_graphics_helper_vehicle_properties.bounding_box_override is None and not math.isclose(body.matrix_world.translation[0], mid_point_x, rel_tol=1e-4):
-                warning = "Body location is not at midpoint, off by {}".format(mid_point_x)
 
             if front is not None:
                 front_position = component.get_bogie_position(SubComponent.FRONT)
             if back is not None:
                 back_position = component.get_bogie_position(SubComponent.BACK)
 
-                #TODO 2026-08-03: why is this in the back classmethod
+                #TODO 2026-08-03: why is this in the back bogie
                 anim_location = component.get_emitter_x()
                 if anim_location is not None and (anim_location > 255 or anim_location < 0):
                     warning = "Emitter is too far from bogies"
@@ -259,6 +256,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 front_position = 0
                 back_position = 0
 
+            body_distance_from_ideal = round(body.matrix_world.translation[0]-mid_point_x,2)
 
             box = layout.box()
             box.label(text="Car {}: {}".format(component.car.loco_graphics_helper_vehicle_properties.index, component.car.name))
@@ -269,6 +267,7 @@ class GraphicsHelperPanel(bpy.types.Panel):
             col.label(text="  Front Bogie Sprite Index: {}".format(front_idx))
             col.label(text="  Back Bogie Sprite Index: {}".format(back_idx))
             col.label(text="  Body Sprite Index: {}".format(body_idx))
+            col.label(text="  Distance from bogie midpoint: {}".format(body_distance_from_ideal))
             if not anim_location is None:
                 col.label(text="  Emitter Horizontal Position: {}".format(anim_location))
 
@@ -284,6 +283,9 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 number_of_sprites = get_number_of_sprites(body)
                 total_number_of_sprites += number_of_sprites
 
+                if number_of_sprites == 0:
+                    continue
+
                 half_width = -1.0/32
                 car = None
                 if body.loco_graphics_helper_vehicle_properties.bounding_box_override:
@@ -291,12 +293,9 @@ class GraphicsHelperPanel(bpy.types.Panel):
                 for component in components:
                     if component.body == body:
                         car = component
-                        half_width = component.get_half_width()
+                        half_width, _, _ = component.get_half_width()
                         break
                 emitter_z = car.get_emitter_z()
-
-                if number_of_sprites == 0:
-                    continue
 
                 if body.loco_graphics_helper_vehicle_properties.render_sprite:
                     renderable_sprites += number_of_sprites

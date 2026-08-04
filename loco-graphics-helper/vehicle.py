@@ -55,37 +55,36 @@ def get_number_of_sprites(object):
         num_sprites = num_sprites + int(props.flat_viewing_angles) * multiplier / 2
     return int(num_sprites)
 
+ignore_object_types = ["ARMATURE"]
+
+# TODO 2026-08-03: determine what LayerCollection an object is in, and ignore it if the LayerCollection.exclude is True
+
 def _get_min_max_axis_bound_box_corners(object, axis):
+    if object.type in ignore_object_types:
+        return (None, None)
     bbox_corners = [object.matrix_world @ Vector(corner) for corner in object.bound_box]
-    min_x = min([x[axis] for x in bbox_corners])
-    max_x = max([x[axis] for x in bbox_corners])
-    return (min_x, max_x)
+    min_a = min([c[axis] for c in bbox_corners])
+    max_a = max([c[axis] for c in bbox_corners])
+    return (min_a, max_a)
 
 def _get_min_max_axis_bound_box_corners_with_children(object, axis):
     mins = []
     maxs = []
-    min_x, max_x = _get_min_max_axis_bound_box_corners(object, axis)
+    min_a, max_a = _get_min_max_axis_bound_box_corners(object, axis)
     # This can happen if there are no dimensions to this object (or if its 0 width)
-    if min_x != max_x:
-        mins.append(min_x)
-        maxs.append(max_x)
+    if min_a is not None:
+        mins.append(min_a)
+        maxs.append(max_a)
 
     for c in object.children:
-        min_x, max_x = _get_min_max_axis_bound_box_corners_with_children(c, axis)
-        if min_x != max_x:
-            mins.append(min_x)
-            maxs.append(max_x)
+        min_a, max_a = _get_min_max_axis_bound_box_corners_with_children(c, axis)
+        if min_a is not None:
+            mins.append(min_a)
+            maxs.append(max_a)
     if len(mins) == 0 or len(maxs) == 0:
-        return (0, 0)
+        return (None, None)
 
     return (min(mins), max(maxs))
-
-def get_half_width(object):
-    body_min_x, body_max_x = _get_min_max_axis_bound_box_corners_with_children(object, 0)
-    min_x = object.matrix_world.translation[0] - body_min_x
-    max_x = body_max_x - object.matrix_world.translation[0]
-
-    return max(min_x, max_x)
 
 class VehicleComponent:
     def __init__(self, car, front, back, body, animations = None):
@@ -114,18 +113,19 @@ class VehicleComponent:
         if props.null_component:
             return 255
         return props.index + 128 if props.is_inverted else props.index
-    
+
+    # Currently unused
     def has_sprites(self, sub_component: SubComponent):
         object = self.get_object(sub_component)
         if object is None:
             return False
         props = object.loco_graphics_helper_vehicle_properties
-        if props.is_clone:
+        if props.is_clone or props.null_component:
             return False
-        
+
         if all(v == 0 for v in props.sprite_track_flags):
             return False
-        
+
         return True
 
     def get_number_of_sprites(self, sub_component: SubComponent):
@@ -166,28 +166,32 @@ class VehicleComponent:
         maxs = []
         if not self.front is None:
             min_x, max_x = self._get_min_max_x_bound_box_corners_with_children(self.front)
-            if min_x != max_x:
+            if min_x is not None:
                 mins.append(min_x)
                 maxs.append(max_x)
 
         if not self.back is None:
             min_x, max_x = self._get_min_max_x_bound_box_corners_with_children(self.back)
-            if min_x != max_x:
+            if min_x is not None:
                 mins.append(min_x)
                 maxs.append(max_x)
         
         body_min_x, body_max_x = self._get_min_max_x_bound_box_corners_with_children(self.body)
         mins.append(body_min_x)
         maxs.append(body_max_x)
-        min_x = self.body.matrix_world.translation[0] - min(mins)
-        max_x = max(maxs) - self.body.matrix_world.translation[0]
+        if len(mins) == 0:
+            min_x = -1
+            max_x = -1
+        else:
+            min_x = min(mins)
+            max_x = max(maxs)
         
-        return max(min_x, max_x)
+        return (max_x - min_x) / 2, min_x, max_x
     
     def get_preferred_body_midpoint(self):
-        if self.has_sprites(SubComponent.FRONT) or self.has_sprites(SubComponent.BACK):
+        if self.front is not None and self.back is not None:
             # If it has a real bogey we should put midpoint between the two bogies
-            mid_point_x = (self.front.location[0] - self.back.location[0]) / 2 + self.back.location[0]
+            mid_point_x = (self.front.matrix_world.translation[0] - self.back.matrix_world.translation[0]) / 2 + self.back.matrix_world.translation[0]
         else:
             # If it has fake/no bogies we should put midpoint in the centre of the body
             body_min_x, body_max_x = self._get_min_max_x_bound_box_corners_with_children(self.body)
@@ -195,23 +199,24 @@ class VehicleComponent:
         return mid_point_x
 
     def get_bogie_position(self, sub_component: SubComponent):
-        assert sub_component != SubComponent.BODY
-        body_x = self.body.matrix_world.translation[0]
-        half_width = self.get_half_width()
-        # bounding_box = self.body.loco_graphics_helper_vehicle_properties.bounding_box_override
-        # if bounding_box:
-        #     body_x = bounding_box.matrix_world.translation[0]
-        #     half_width = get_half_width(bounding_box)
+        assert sub_component.value != SubComponent.BODY.value
+        half_width, min_x, max_x = self.get_half_width()
+
+        bounding_box = self.body.loco_graphics_helper_vehicle_properties.bounding_box_override
+        if bounding_box is not None:
+            min_x, max_x = _get_min_max_axis_bound_box_corners(bounding_box, 0)
+
         bogie = self.get_object(sub_component)
         bogie_x = bogie.matrix_world.translation[0]
-        position_from_centre = max(body_x, bogie_x) - min(body_x, bogie_x)
-        return half_width - position_from_centre
+
+        if sub_component.value == SubComponent.BACK.value:
+            return bogie_x - min_x
+        return max_x - bogie_x
     
     def get_emitter_x(self):
         if len(self.animations) == 0:
             return 0
         x_diff = self.front.matrix_world.translation[0] - self.back.matrix_world.translation[0]
-        print("front_x {} back_x {} anim_x {}".format(self.front.location[0], self.back.location[0], self.animations[0].location[0]))
         x_factor = (1 / x_diff)
         anim_diff = self.front.location[0] - self.animations[0].location[0]
         anim_factor = (anim_diff * x_factor) * 128
@@ -244,8 +249,8 @@ def get_car_components(cars) -> List[VehicleComponent]:
             components.append(VehicleComponent(car, None, None, component_bodies[0], component_animations))
             continue
         
-        front_bogie = component_bogies[0] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[1]
-        back_bogie = component_bogies[1] if component_bogies[0].location[0] > component_bogies[1].location[0] else component_bogies[0]
+        front_bogie = component_bogies[0] if component_bogies[0].matrix_world.translation[0]> component_bogies[1].matrix_world.translation[0] else component_bogies[1]
+        back_bogie = component_bogies[1] if component_bogies[0].matrix_world.translation[0] > component_bogies[1].matrix_world.translation[0] else component_bogies[0]
 
         components.append(VehicleComponent(car, front_bogie, back_bogie, component_bodies[0], component_animations))
     return components

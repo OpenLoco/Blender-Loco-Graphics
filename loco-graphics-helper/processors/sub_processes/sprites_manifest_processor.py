@@ -37,11 +37,20 @@ class SpritesManifestProcessor(SubProcessor):
 
         output_info_list.sort(key=get_index)
 
+        images = []
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, "r") as images_file:
+                    images = json.loads(images_file.read(),
+                                        object_pairs_hook=OrderedDict)
+                    images_file.close()
+            except Exception as e:
+                print("Error when reading sprites.json",e)
+
         with open(file_path, "w") as images_file:
-            images = []
             for output_info in output_info_list:
                 while len(images) <= output_info.index:
-                    images.append("")
+                    images.append({})
 
                 image_dict = OrderedDict()
                 image_dict["path"] = "sprites/" + \
