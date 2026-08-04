@@ -221,6 +221,9 @@ class GraphicsHelperPanel(bpy.types.Panel):
 
     def draw_vehicle_panel(self, scene, layout):
         general_properties = scene.loco_graphics_helper_general_properties
+
+        row = layout.row()
+        row.prop(general_properties,"transport_mode")
         
         cars = [x for x in scene.objects if x.loco_graphics_helper_object_properties.object_type == "CAR"]
         cars = sorted(cars, key=lambda x: x.loco_graphics_helper_vehicle_properties.index)

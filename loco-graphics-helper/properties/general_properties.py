@@ -113,6 +113,16 @@ class GeneralProperties(bpy.types.PropertyGroup):
         description="Whether or not the RCT add-on is currently rendering.",
         default=False)
 
+    transport_mode: bpy.props.EnumProperty(
+        name="Transport Mode",
+        items=(
+            ("RAIL","Rail","Railway vehicle",0),
+            ("ROAD","Road","Road or tram vehicle", 1),
+            ("AIR","Air","Aircraft", 2),
+            ("WATER","Water","Watercraft", 3)
+        )
+    )
+
     build_gx: bpy.props.BoolProperty(
         name="Generate GX (optimized sprite file)",
         description="Whether or not to create a .dat sprite file. Having GXC installed is required.",

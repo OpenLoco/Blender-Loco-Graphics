@@ -17,6 +17,15 @@ class SubComponent(Enum):
     BACK = 1
     BODY = 2
 
+def get_vehicle_y_offset():
+    additional_offsets = {
+        "RAIL":0,
+        "ROAD":0,
+        "AIR":0,
+        "WATER":0,
+    }
+    return -17 + additional_offsets[bpy.context.scene.loco_graphics_helper_general_properties.transport_mode]
+
 class VehicleComponent:
     def __init__(self, car, front, back, body, animations = None):
         self.car = car

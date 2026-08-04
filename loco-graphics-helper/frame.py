@@ -130,6 +130,9 @@ class Frame:
         self.offset_x = offset_x
         self.offset_y = offset_y
 
+    def set_offset_y(self, offset_y):
+        self.offset_y = offset_y
+
     def set_multi_tile_size(self, width, length, invert_tile_positions):
         self.width = width
         self.length = length

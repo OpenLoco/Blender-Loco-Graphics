@@ -7,11 +7,24 @@ Interested in contributing? Visit https://github.com/oli414/Blender-RCT-Graphics
 RCT Graphics Helper is licensed under the GNU General Public License version 3.
 '''
 
+import bpy
 from ..frame import Frame
 from ..render_task import RenderTask
+from ..vehicle import get_vehicle_y_offset
 
 # Builder for creating render tasks procedurally
 
+
+def get_offset_y():
+    properties = bpy.context.scene.loco_graphics_helper_general_properties
+    if properties.render_mode == "TILES":
+        return 0
+    elif properties.render_mode == "VEHICLE":
+        return get_vehicle_y_offset()
+    elif properties.render_mode == "WALLS":
+        return 0
+    elif properties.render_mode == "TRACK":
+        return 0
 
 class TaskBuilder:
 
@@ -80,6 +93,8 @@ class TaskBuilder:
         frame.animation_frame_index = animation_index
 
         frame.set_target_object(target_object)
+
+        frame.set_offset_y(get_offset_y())
 
         self.angles.append(frame)
         self.output_index = self.output_index + 1
